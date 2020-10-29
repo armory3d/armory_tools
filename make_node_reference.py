@@ -20,6 +20,7 @@ USAGE:
         Please also read the usage notes in that file!
 """
 import ensurepip
+import itertools
 import os
 import subprocess
 import sys
@@ -47,6 +48,11 @@ def get_anchor(text: str) -> str:
     return "#" + text.lower().replace(" ", "-")
 
 
+def make_node_link(nodename: str) -> str:
+    """Create a link to a node given by the name of the node"""
+    return Link(label=InlineCode(nodename), url=get_anchor(nodename))
+
+
 def get_nodetype(typename: str):
     """Convert the type name to the actual type."""
     return bpy.types.bpy_struct.bl_rna_get_subclass_py(typename)
@@ -62,6 +68,9 @@ def generate_node_documentation(nodeitem: NodeItem, category: arm_nodes.ArmNodeC
         node_description = doc_parts[0].rstrip("\n")
         # Remove trailing whitespace and ignore newlines
         node_description = " ".join(node_description.split()).replace("\n", "")
+
+        deprecation_note = Optional()
+        Document.add(deprecation_note)
         Document.add(Paragraph(node_description))
 
         has_see = False
@@ -80,7 +89,7 @@ def generate_node_documentation(nodeitem: NodeItem, category: arm_nodes.ArmNodeC
                     Document.add(Paragraph(Bold("See also:")))
                     Document.add(UnorderedList(see_list))
 
-                see_list.append(Italic(Link(label=InlineCode(part[8:].rstrip()), url=get_anchor(part[8:].rstrip()))))
+                see_list.append(Italic(make_node_link(part[8:].rstrip())))
 
             # General references
             elif part.startswith("see "):
@@ -129,6 +138,25 @@ def generate_node_documentation(nodeitem: NodeItem, category: arm_nodes.ArmNodeC
                 description = " ".join(description.split()).replace("\n", "")
                 option_list.append(f"{InlineCode(option_name)}: {description}")
 
+            elif part.startswith("deprecated "):
+                alternatives, message = part[11:].split(":", 1)
+
+                message = " ".join(message.split()).replace("\n", "")
+                if not message.endswith(".") and not message == "":
+                    message += "."
+
+                links = []
+                for alternative in alternatives.split(","):
+                    if alternative == "":
+                        continue
+                    links.append(str(make_node_link(alternative)))
+
+                if len(links) > 0:
+                    alternatives = f"Please use the following node(s) instead: {', '.join(links)}."
+                    message = alternatives + " " + message
+
+                deprecation_note.content = Quote(f"{Bold('DEPRECATED.')} This node is deprecated and will be removed in future versions of Armory. {message}")
+
         # Link to sources
         node_file_py = "/".join(nodetype.__module__.split(".")[2:]) + ".py"
         node_file_hx = nodetype.bl_idname[2:] + ".hx"  # Discard LN prefix
@@ -175,7 +203,8 @@ def run():
 
             with HeaderSubLevel():
                 # Sort nodes alphabetically and discard section order
-                for nodeitem in sorted(category.get_all_nodes(), key=lambda n: n.label):
+                iterator = itertools.chain(category.get_all_nodes(), category.deprecated_nodes)
+                for nodeitem in sorted(iterator, key=lambda n: n.label):
                     Document.add(Header(nodeitem.label))
 
                     generate_node_documentation(nodeitem, category)
