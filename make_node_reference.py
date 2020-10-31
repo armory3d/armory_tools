@@ -30,6 +30,7 @@ import bpy
 from nodeitems_utils import NodeItem
 
 from arm.logicnode import arm_nodes
+import arm.props
 
 ensurepip.bootstrap()
 os.environ.pop("PIP_REQ_TRACKER", None)
@@ -179,6 +180,8 @@ def run():
         f" or the {Link(label='generator script', url='https://github.com/armory3d/armory_tools/blob/master/make_node_reference.py')}"
         f" and {Link(label='open a pull request', url='https://github.com/armory3d/armory/wiki/contribute#creating-a-pull-request')}."
         " Thank you for contributing to this reference!")))
+
+    Document.add(Paragraph(Italic(f"This reference was built for {Bold(f'Armory {arm.props.arm_version}')}.")))
 
     Document.add(HorizontalRule())
 
