@@ -57,15 +57,18 @@ def run():
         pos.extend(vert.co)
         nor.extend(vert.normal)
 
+    pos_rounded = [round(elem, 5) for elem in pos]
+    nor_rounded = [round(elem, 5) for elem in nor]
+
     bm.free()
 
     print("\n====================")
     print(f"Calculated mesh data for object '{obj.name}':")
     print(f"Indices: {list_representation(indices)}")
     print("")
-    print(f"Positions: {list_representation(pos)}")
+    print(f"Positions: {list_representation(pos_rounded)}")
     print("")
-    print(f"Normals: {list_representation(nor)}")
+    print(f"Normals: {list_representation(nor_rounded)}")
 
 
 if __name__ == "__main__":
