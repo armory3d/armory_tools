@@ -105,11 +105,17 @@ Main.initialized = function($window) {
 	var ar = Main.prefs.path.split("/");
 	ar.pop();
 	Main.cwd = ar.join("/");
-	var path = kha_System.get_systemId() == "Windows" ? StringTools.replace(Main.prefs.path,"/","\\") : Main.prefs.path;
-	kha_Assets.loadBlobFromPath(path,function(cblob) {
-		var raw = JSON.parse(cblob.toString());
+	if(Main.cwd != "") {
+		var path = kha_System.get_systemId() == "Windows" ? StringTools.replace(Main.prefs.path,"/","\\") : Main.prefs.path;
+		kha_Assets.loadBlobFromPath(path,function(cblob) {
+			var raw = JSON.parse(cblob.toString());
+			Main.inst = new arm2d_Editor(raw);
+		},null,{ fileName : "Main.hx", lineNumber : 58, className : "Main", methodName : "initialized"});
+	} else {
+		Main.prefs.path = Krom.getFilesLocation();
+		var raw = { name : "untitled", x : 0, y : 0, width : 1280, height : 720, theme : "Default Light", elements : [], assets : []};
 		Main.inst = new arm2d_Editor(raw);
-	},null,{ fileName : "Main.hx", lineNumber : 57, className : "Main", methodName : "initialized"});
+	}
 };
 Main.loadDefaultKeyMap = function() {
 	Main.prefs.keyMap.grabKey = 71;
@@ -836,6 +842,7 @@ arm2d_ElementController.selectElement = function(canvas) {
 	if(selectButton == "Left" && arm2d_ElementController.ui.inputStarted && arm2d_ElementController.ui.inputDown || selectButton == "Right" && arm2d_ElementController.ui.inputStartedR && arm2d_ElementController.ui.inputDownR) {
 		var lastSelected = arm2d_Editor.selectedElem;
 		arm2d_Editor.selectedElem = null;
+		arm2d_ElementController.newElementSelected = false;
 		var sorted_elements = canvas.elements.slice();
 		sorted_elements.reverse();
 		var _g = 0;
@@ -854,9 +861,13 @@ arm2d_ElementController.selectElement = function(canvas) {
 			var rotHandleH = (8 * arm2d_ElementController.ui.ops.scaleFactor | 0) * 2 + (8 * arm2d_ElementController.ui.ops.scaleFactor | 0) / 2;
 			if(arm2d_tools_Math.hitbox(arm2d_ElementController.cui,canvas.x + ex - (8 * arm2d_ElementController.ui.ops.scaleFactor | 0) / 2,canvas.y + ey - (8 * arm2d_ElementController.ui.ops.scaleFactor | 0) / 2,ew + (8 * arm2d_ElementController.ui.ops.scaleFactor | 0),eh + (8 * arm2d_ElementController.ui.ops.scaleFactor | 0),elem.rotation) || arm2d_tools_Math.hitbox(arm2d_ElementController.cui,rotHandleX,rotHandleY,8 * arm2d_ElementController.ui.ops.scaleFactor | 0,rotHandleH,elem.rotation,[cx,cy]) && lastSelected == elem) {
 				arm2d_Editor.selectedElem = elem;
+				if(lastSelected != elem) {
+					arm2d_ElementController.newElementSelected = true;
+				}
 				break;
 			}
 		}
+		arm2d_ui_UIProperties.hwin.redraws = 2;
 	}
 };
 arm2d_ElementController.render = function(g,canvas) {
@@ -956,6 +967,9 @@ arm2d_ElementController.render = function(g,canvas) {
 arm2d_ElementController.update = function(ui,cui,canvas) {
 	arm2d_ElementController.ui = ui;
 	arm2d_ElementController.cui = cui;
+	if(arm2d_ElementController.newElementSelected) {
+		return;
+	}
 	if(arm2d_Editor.selectedElem != null) {
 		var elem = arm2d_Editor.selectedElem;
 		var anchorOffset = zui_Canvas.getAnchorOffset(canvas,elem);
@@ -1362,6 +1376,9 @@ arm2d_tools_CanvasTools.makeElem = function(cui,canvas,type) {
 		break;
 	case 19:
 		name = arm2d_tools_CanvasTools.unique("CProgress_bar",canvas.elements,"name");
+		break;
+	case 20:
+		name = arm2d_tools_CanvasTools.unique("TextArea",canvas.elements,"name");
 		break;
 	}
 	var elem = { id : zui_Canvas.getElementId(canvas), type : type, name : name, event : "", x : 0, y : 0, width : 150, height : height, rotation : 0, text : "My " + name, asset : "", progress_at : 0, progress_total : 100, strength : 1, alignment : js_Boot.__cast(alignment , Int), anchor : 0, parent : null, children : [], visible : true};
@@ -28802,7 +28819,7 @@ zui_Canvas.__name__ = true;
 zui_Canvas.draw = function(ui,canvas,g) {
 	zui_Canvas.screenW = kha_System.windowWidth();
 	zui_Canvas.screenH = kha_System.windowHeight();
-	zui_Canvas.events = [];
+	zui_Canvas.events.length = 0;
 	zui_Canvas._ui = ui;
 	g.end();
 	ui.begin(g);
@@ -29082,6 +29099,28 @@ zui_Canvas.drawElement = function(ui,canvas,element,px,py) {
 		kha_graphics2_GraphicsExtension.fillCircle(ui.g,ui._x + (element.width * zui_Canvas._ui.ops.scaleFactor | 0) / 2,ui._y + (element.height * zui_Canvas._ui.ops.scaleFactor | 0) / 2,ui._w / 2 - 10);
 		ui.g.set_color(col);
 		break;
+	case 20:
+		var color = element.color_text;
+		var defaultColor = zui_Canvas.getTheme(canvas.theme).TEXT_COL;
+		ui.t.TEXT_COL = color != null ? color : defaultColor;
+		var color = element.color_text;
+		var defaultColor = zui_Canvas.getTheme(canvas.theme).TEXT_COL;
+		ui.t.LABEL_COL = color != null ? color : defaultColor;
+		var color = element.color;
+		var defaultColor = zui_Canvas.getTheme(canvas.theme).BUTTON_COL;
+		ui.t.ACCENT_COL = color != null ? color : defaultColor;
+		var color = element.color_hover;
+		var defaultColor = zui_Canvas.getTheme(canvas.theme).BUTTON_HOVER_COL;
+		ui.t.ACCENT_HOVER_COL = color != null ? color : defaultColor;
+		zui_Canvas.h.nest(element.id).text = element.text;
+		zui_Ext.textArea(ui,zui_Canvas.h.nest(element.id),element.alignment,element.editable);
+		if(zui_Canvas.h.nest(element.id).changed) {
+			var e = element.event;
+			if(e != null && e != "") {
+				zui_Canvas.events.push(e);
+			}
+		}
+		break;
 	}
 	if(element.children != null) {
 		var _g = 0;
@@ -29221,14 +29260,17 @@ zui_Canvas.getAnchorOffset = function(canvas,element) {
 var zui_Ext = function() { };
 $hxClasses["zui.Ext"] = zui_Ext;
 zui_Ext.__name__ = true;
-zui_Ext.floatInput = function(ui,handle,label,align) {
+zui_Ext.floatInput = function(ui,handle,label,align,precision) {
+	if(precision == null) {
+		precision = 1000.0;
+	}
 	if(align == null) {
 		align = 0;
 	}
 	if(label == null) {
 		label = "";
 	}
-	handle.text = handle.value == null ? "null" : "" + handle.value;
+	handle.text = Std.string(Math.round(handle.value * precision) / precision);
 	var text = ui.textInput(handle,label,align);
 	handle.value = parseFloat(text);
 	return handle.value;
@@ -30253,6 +30295,7 @@ zui_Popup.init = function(mx,my,mw,mh) {
 	zui_Popup.modalY = Math.max(0,Math.min(zui_Popup.modalY,appH - zui_Popup.modalH)) | 0;
 	zui_Popup.hwnd.dragX = 0;
 	zui_Popup.hwnd.dragY = 0;
+	zui_Popup.hwnd.scrollOffset = 0.0;
 	zui_Popup.show = true;
 };
 var zui_Themes = function() { };
@@ -30549,6 +30592,7 @@ zui_Zui.prototype = {
 		kha_input_Mouse.get().removeWindowed(this.ops.khaWindowId,$bind(this,this.onMouseDown),$bind(this,this.onMouseUp),$bind(this,this.onMouseMove),$bind(this,this.onMouseWheel));
 		kha_input_Keyboard.get().remove($bind(this,this.onKeyDown),$bind(this,this.onKeyUp),$bind(this,this.onKeyPress));
 		this.endInput();
+		this.isShiftDown = this.isCtrlDown = this.isAltDown = false;
 		this.inputX = this.inputY = 0;
 		this.inputRegistered = false;
 	}
@@ -30571,7 +30615,7 @@ zui_Zui.prototype = {
 			this.endWindow();
 		}
 		this.drawCombo();
-		this.drawTooltip();
+		this.drawTooltip(true);
 		this.tabPressedHandle = null;
 		if(last) {
 			this.endInput();
@@ -30600,7 +30644,7 @@ zui_Zui.prototype = {
 		if(last == null) {
 			last = true;
 		}
-		this.drawTooltip();
+		this.drawTooltip(false);
 		this.tabPressedHandle = null;
 		if(last) {
 			this.endInput();
@@ -30871,7 +30915,11 @@ zui_Zui.prototype = {
 			if(this.tabHandle.position >= this.tabNames.length) {
 				this.tabHandle.position = 0;
 			}
+			this.tabHandle.changed = true;
 			this.isTabDown = false;
+		}
+		if(this.tabHandle.position >= this.tabNames.length) {
+			this.tabHandle.position = this.tabNames.length - 1;
 		}
 		this.g.set_color(this.t.SEPARATOR_COL);
 		if(this.tabVertical) {
@@ -30925,7 +30973,7 @@ zui_Zui.prototype = {
 			}
 			g.fillRect(x,y - 1,w,tabH + 1);
 			this.g.set_color(selected ? this.t.BUTTON_TEXT_COL : this.t.LABEL_COL);
-			this.drawString(this.g,this.tabNames[i],this.t.TEXT_OFFSET,0,0);
+			this.drawString(this.g,this.tabNames[i],null,0,0);
 			if(selected && !this.tabVertical) {
 				this.g.set_color(this.t.WINDOW_BG_COL);
 				this.g.fillRect(this._x + this.buttonOffsetY + 1,this._y + this.buttonOffsetY + tabH,this._w - 1,1);
@@ -31111,7 +31159,7 @@ zui_Zui.prototype = {
 			this.g.fillRect(this._x + this.buttonOffsetY,this._y + this.buttonOffsetY,this._w - this.buttonOffsetY * 2,this.t.BUTTON_H * this.ops.scaleFactor);
 		}
 		this.g.set_color(this.t.TEXT_COL);
-		this.drawString(this.g,text,this.t.TEXT_OFFSET * this.ops.scaleFactor,0,align);
+		this.drawString(this.g,text,null,0,align);
 		this.endElement(h + this.t.ELEMENT_OFFSET * this.ops.scaleFactor);
 		if(started) {
 			return 1;
@@ -31221,6 +31269,10 @@ zui_Zui.prototype = {
 			} else if(editable && this.key != 16 && this.key != 20 && this.key != 17 && this.key != 224 && this.key != 18 && this.key != 38 && this.key != 40 && this.char != null && this.char != "" && HxOverrides.cca(this.char,0) >= 32) {
 				text = HxOverrides.substr(text,0,this.highlightAnchor) + this.char + HxOverrides.substr(text,this.cursorX,null);
 				this.cursorX = this.cursorX + 1 > text.length ? text.length : this.cursorX + 1;
+				if(zui_Zui.dynamicGlyphLoad && HxOverrides.cca(this.char,0) > 126 && kha_graphics2_Graphics.fontGlyphs.indexOf(HxOverrides.cca(this.char,0)) == -1) {
+					kha_graphics2_Graphics.fontGlyphs.push(HxOverrides.cca(this.char,0));
+					kha_graphics2_Graphics.fontGlyphs = kha_graphics2_Graphics.fontGlyphs.slice();
+				}
 			}
 			var selecting = this.isShiftDown && (this.key == 37 || this.key == 39 || this.key == 16);
 			if(!selecting && !this.isCtrlDown) {
@@ -31332,8 +31384,7 @@ zui_Zui.prototype = {
 		if(label != "") {
 			this.g.set_color(this.t.LABEL_COL);
 			var labelAlign = align == 2 ? 0 : 2;
-			var xOffset = labelAlign == 0 ? 7 : 0;
-			this.drawString(this.g,label,xOffset,0,labelAlign);
+			this.drawString(this.g,label,labelAlign == 0 ? null : 0,0,labelAlign);
 		}
 		this.g.set_color(this.t.TEXT_COL);
 		if(this.textSelectedHandle != handle) {
@@ -31397,10 +31448,10 @@ zui_Zui.prototype = {
 			g.drawRect(x,y,w,h,strength);
 		}
 		this.g.set_color(this.t.BUTTON_TEXT_COL);
-		this.drawString(this.g,text,this.t.TEXT_OFFSET * this.ops.scaleFactor,0,align);
+		this.drawString(this.g,text,null,0,align);
 		if(label != "") {
 			this.g.set_color(this.t.LABEL_COL);
-			this.drawString(this.g,label,this.t.TEXT_OFFSET * this.ops.scaleFactor,0,align == 2 ? 0 : 2);
+			this.drawString(this.g,label,null,0,align == 2 ? 0 : 2);
 		}
 		this.endElement();
 		return released;
@@ -31472,6 +31523,7 @@ zui_Zui.prototype = {
 				this.comboSelectedW = this._w | 0;
 				this.comboItemCount = itemCount < 0 ? texts.length : itemCount;
 				this.comboItemOffset = -1;
+				this.comboToSubmit = handle.position;
 			}
 		}
 		if(handle == this.submitComboHandle) {
@@ -31618,8 +31670,11 @@ zui_Zui.prototype = {
 		}
 		if(this.submitTextHandle == handle) {
 			this.submitTextEdit();
-			var code = handle.text;
-			handle.value = eval(code);
+			try {
+				var code = handle.text;
+				handle.value = eval(code);
+			} catch( _g ) {
+			}
 			handle.changed = this.changed = true;
 		}
 		this.g.set_color(this.t.LABEL_COL);
@@ -31785,9 +31840,8 @@ zui_Zui.prototype = {
 		}
 		var _g = this.g;
 		this.globalG.set_color(this.t.SEPARATOR_COL);
-		var elementSize = this.t.ELEMENT_H * this.ops.scaleFactor + this.t.ELEMENT_OFFSET * this.ops.scaleFactor | 0;
 		var maxItemCount = Math.min(this.comboSelectedTexts.length,this.comboItemCount) | 0;
-		var comboH = (maxItemCount + 1) * elementSize;
+		var comboH = (maxItemCount + (this.comboSelectedLabel != "" ? 1 : 0)) * (this.t.ELEMENT_H * this.ops.scaleFactor | 0);
 		this.globalG.begin(false);
 		var distTop = this.comboSelectedY - comboH - (this.t.ELEMENT_H * this.ops.scaleFactor | 0);
 		var distBottom = kha_System.windowHeight() - (this.comboSelectedY + comboH);
@@ -31795,6 +31849,18 @@ zui_Zui.prototype = {
 		var comboY = outOfScreen ? this.comboSelectedY - comboH - (this.t.ELEMENT_H * this.ops.scaleFactor | 0) : this.comboSelectedY;
 		this.globalG.fillRect(this.comboSelectedX,comboY,this.comboSelectedW,comboH);
 		this.beginRegion(this.globalG,this.comboSelectedX,comboY,this.comboSelectedW);
+		if(this.isKeyPressed) {
+			if(this.key == (outOfScreen ? 40 : 38) && this.comboToSubmit > 0) {
+				this.comboToSubmit--;
+				this.submitComboHandle = this.comboSelectedHandle;
+			} else if(this.key == (outOfScreen ? 38 : 40) && this.comboToSubmit < this.comboSelectedTexts.length - 1) {
+				this.comboToSubmit++;
+				this.submitComboHandle = this.comboSelectedHandle;
+			}
+			if(this.comboSelectedWindow != null) {
+				this.comboSelectedWindow.redraws = 2;
+			}
+		}
 		if(this.comboItemOffset == -1) {
 			if(outOfScreen) {
 				this.comboItemOffset = this.comboSelectedTexts.length - 1 - this.comboSelectedHandle.position;
@@ -31805,14 +31871,16 @@ zui_Zui.prototype = {
 			var max = this.comboSelectedTexts.length - maxItemCount;
 			this.comboItemOffset = value < 0 ? 0 : value > max ? max : value;
 		}
-		if(outOfScreen) {
+		if(outOfScreen && this.comboSelectedLabel != "") {
 			this.g.set_color(this.t.LABEL_COL);
 			this.drawString(this.g,this.comboSelectedLabel,null,0,2);
-			this._y += elementSize;
+			this._y += this.t.ELEMENT_H * this.ops.scaleFactor;
 			this.fill(0,0,this._w / this.ops.scaleFactor,this.ops.scaleFactor,this.t.ACCENT_SELECT_COL);
 		}
 		this.inputEnabled = true;
-		var BUTTON_COL = this.t.BUTTON_COL;
+		var _BUTTON_COL = this.t.BUTTON_COL;
+		var _ELEMENT_OFFSET = this.t.ELEMENT_OFFSET;
+		this.t.ELEMENT_OFFSET = 0;
 		var _g1 = this.comboItemOffset;
 		var _g2 = this.comboItemOffset + maxItemCount;
 		while(_g1 < _g2) {
@@ -31828,8 +31896,9 @@ zui_Zui.prototype = {
 				break;
 			}
 		}
-		this.t.BUTTON_COL = BUTTON_COL;
-		if(!outOfScreen) {
+		this.t.BUTTON_COL = _BUTTON_COL;
+		this.t.ELEMENT_OFFSET = _ELEMENT_OFFSET;
+		if(!outOfScreen && this.comboSelectedLabel != "") {
 			this.fill(0,0,this._w / this.ops.scaleFactor,this.ops.scaleFactor,this.t.ACCENT_SELECT_COL);
 			this.g.set_color(this.t.LABEL_COL);
 			this.drawString(this.g,this.comboSelectedLabel,null,0,2);
@@ -31837,11 +31906,11 @@ zui_Zui.prototype = {
 		var maxOffset = this.comboSelectedTexts.length - this.comboItemCount;
 		if(maxOffset > 0) {
 			var barH = Math.max(this.comboItemCount / this.comboSelectedTexts.length * (this.t.ELEMENT_H * this.ops.scaleFactor) * 16,this.t.ELEMENT_H * this.ops.scaleFactor);
-			var off = (comboH - barH - elementSize) * this.comboItemOffset / maxOffset;
+			var off = (comboH - barH - this.t.ELEMENT_H * this.ops.scaleFactor) * this.comboItemOffset / maxOffset;
 			this.g.set_color(this.t.ACCENT_COL);
 			this.g.fillRect(this._x + this._w - (this.t.SCROLL_W * this.ops.scaleFactor | 0) / 3,comboY + off,(this.t.SCROLL_W * this.ops.scaleFactor | 0) / 3,barH);
 		}
-		if((this.inputReleased || this.isEscapeDown) && !zui_Zui.comboFirst) {
+		if((this.inputReleased || this.isEscapeDown || this.isReturnDown) && !zui_Zui.comboFirst) {
 			this.comboSelectedHandle = null;
 			zui_Zui.comboFirst = true;
 		} else {
@@ -31852,7 +31921,7 @@ zui_Zui.prototype = {
 		this.globalG.end();
 		this.g = _g;
 	}
-	,drawTooltip: function() {
+	,drawTooltip: function(bindGlobalG) {
 		if(this.tooltipText != "" || this.tooltipImg != null) {
 			if(this.inputChanged()) {
 				this.tooltipShown = false;
@@ -31865,16 +31934,16 @@ zui_Zui.prototype = {
 			}
 			if(!this.tooltipWait && kha_Scheduler.time() - this.tooltipTime > 1.0) {
 				if(this.tooltipText != "") {
-					this.drawTooltipText();
+					this.drawTooltipText(bindGlobalG);
 				} else {
-					this.drawTooltipImage();
+					this.drawTooltipImage(bindGlobalG);
 				}
 			}
 		} else {
 			this.tooltipShown = false;
 		}
 	}
-	,drawTooltipText: function() {
+	,drawTooltipText: function(bindGlobalG) {
 		this.globalG.set_color(this.t.TEXT_COL);
 		var lines = this.tooltipText.split("\n");
 		var tooltipW = 0.0;
@@ -31888,8 +31957,11 @@ zui_Zui.prototype = {
 			}
 		}
 		this.tooltipX = Math.min(this.tooltipX,kha_System.windowWidth() - tooltipW - 20);
-		this.globalG.begin(false);
-		this.globalG.fillRect(this.tooltipX,this.tooltipY,tooltipW + 20,this.t.ELEMENT_H * this.ops.scaleFactor * lines.length * 0.6);
+		if(bindGlobalG) {
+			this.globalG.begin(false);
+		}
+		var fontHeight = this.ops.font.height(this.fontSize);
+		this.globalG.fillRect(this.tooltipX,this.tooltipY,tooltipW + 20,fontHeight * lines.length);
 		this.globalG.set_font(this.ops.font);
 		this.globalG.set_fontSize(this.fontSize);
 		this.globalG.set_color(this.t.ACCENT_COL);
@@ -31899,9 +31971,11 @@ zui_Zui.prototype = {
 			var i = _g++;
 			this.globalG.drawString(lines[i],this.tooltipX + 5,this.tooltipY + i * this.fontSize);
 		}
-		this.globalG.end();
+		if(bindGlobalG) {
+			this.globalG.end();
+		}
 	}
-	,drawTooltipImage: function() {
+	,drawTooltipImage: function(bindGlobalG) {
 		var w = this.tooltipImg.get_width();
 		if(this.tooltipImgMaxWidth != null && w > this.tooltipImgMaxWidth) {
 			w = this.tooltipImgMaxWidth;
@@ -31909,8 +31983,10 @@ zui_Zui.prototype = {
 		var h = this.tooltipImg.get_height() * (w / this.tooltipImg.get_width());
 		this.tooltipX = Math.min(this.tooltipX,kha_System.windowWidth() - w - 20);
 		this.tooltipY = Math.min(this.tooltipY,kha_System.windowHeight() - h - 20);
+		if(bindGlobalG) {
+			this.globalG.begin(false);
+		}
 		this.globalG.set_color(-16777216);
-		this.globalG.begin(false);
 		this.globalG.fillRect(this.tooltipX,this.tooltipY,w,h);
 		this.globalG.set_color(-1);
 		if(this.tooltipInvertY) {
@@ -31918,7 +31994,9 @@ zui_Zui.prototype = {
 		} else {
 			this.globalG.drawScaledImage(this.tooltipImg,this.tooltipX,this.tooltipY,w,h);
 		}
-		this.globalG.end();
+		if(bindGlobalG) {
+			this.globalG.end();
+		}
 	}
 	,drawString: function(g,text,xOffset,yOffset,align) {
 		if(align == null) {
@@ -31928,7 +32006,7 @@ zui_Zui.prototype = {
 			yOffset = 0;
 		}
 		var fullLength = text.length;
-		while(text.length > 0 && this.ops.font.width(this.fontSize,text) > this._w) text = HxOverrides.substr(text,0,text.length - 1);
+		while(text.length > 0 && this.ops.font.width(this.fontSize,text) > this._w - 6) text = HxOverrides.substr(text,0,text.length - 1);
 		if(text.length < fullLength) {
 			text += "..";
 		}
@@ -32386,6 +32464,7 @@ arm2d_ElementController.grab = false;
 arm2d_ElementController.grabX = false;
 arm2d_ElementController.grabY = false;
 arm2d_ElementController.rotate = false;
+arm2d_ElementController.newElementSelected = false;
 zui_Handle.global = new zui_Handle();
 arm2d_ui_UIProperties.hwin = zui_Handle.global.nest(1,null);
 haxe_Unserializer.DEFAULT_RESOLVER = new haxe__$Unserializer_DefaultResolver();
@@ -32611,6 +32690,7 @@ zui_Themes.dark = { NAME : "Default Dark", WINDOW_BG_COL : -13421773, WINDOW_TIN
 zui_Themes.light = { NAME : "Default Light", WINDOW_BG_COL : -1052689, WINDOW_TINT_COL : -14540254, ACCENT_COL : -1118482, ACCENT_HOVER_COL : -4473925, ACCENT_SELECT_COL : -5592406, BUTTON_COL : -3355444, BUTTON_TEXT_COL : -14540254, BUTTON_HOVER_COL : -5000269, BUTTON_PRESSED_COL : -5131855, TEXT_COL : -6710887, LABEL_COL : -5592406, SEPARATOR_COL : -6710887, HIGHLIGHT_COL : -14656100, CONTEXT_COL : -5592406, PANEL_BG_COL : -5592406, FONT_SIZE : 26, ELEMENT_W : 200, ELEMENT_H : 48, ELEMENT_OFFSET : 8, ARROW_SIZE : 10, BUTTON_H : 44, CHECK_SIZE : 30, CHECK_SELECT_SIZE : 16, SCROLL_W : 12, TEXT_OFFSET : 16, TAB_W : 24, FILL_WINDOW_BG : false, FILL_BUTTON_BG : true, FILL_ACCENT_BG : false, LINK_STYLE : 0};
 zui_Zui.alwaysRedrawWindow = true;
 zui_Zui.keyRepeat = true;
+zui_Zui.dynamicGlyphLoad = true;
 zui_Zui.touchControls = false;
 zui_Zui.keyRepeatTime = 0.0;
 zui_Zui.textToPaste = "";
