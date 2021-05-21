@@ -34,7 +34,7 @@ import arm.props
 
 ensurepip.bootstrap()
 os.environ.pop("PIP_REQ_TRACKER", None)
-subprocess.check_output([bpy.app.binary_path_python, '-m', 'pip', 'install', '--upgrade', 'markdownmaker'])
+subprocess.check_output([sys.executable, '-m', 'pip', 'install', '--upgrade', 'markdownmaker'])
 
 from markdownmaker.document import Document
 from markdownmaker.markdownmaker import *
