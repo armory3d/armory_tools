@@ -34,7 +34,7 @@ import arm.props
 
 ensurepip.bootstrap()
 os.environ.pop("PIP_REQ_TRACKER", None)
-subprocess.check_output([bpy.app.binary_path_python, '-m', 'pip', 'install', '--upgrade', 'markdownmaker'])
+subprocess.check_output([sys.executable, '-m', 'pip', 'install', '--upgrade', 'markdownmaker'])
 
 from markdownmaker.document import Document
 from markdownmaker.markdownmaker import *
@@ -57,6 +57,30 @@ def make_node_link(nodename: str) -> str:
 def get_nodetype(typename: str):
     """Convert the type name to the actual type."""
     return bpy.types.bpy_struct.bl_rna_get_subclass_py(typename)
+
+
+def format_desc(description_text: str):
+    """Format the raw description string."""
+    # Remove spaces, tabs and carriage returns left/right of each line
+    lines = [l.strip(" \t\r") for l in description_text.split("\n")]
+
+    # Replace empty lines with \n
+    lines = list(map(lambda l: l.replace("", "\n") if l == "" else l, lines))
+
+    # Remove empty lines from the end of the list
+    for idx, line in enumerate(reversed(lines)):
+        if line != "\n":
+            # [:0] would empty the list, instead ignore it
+            if idx != 0:
+                lines = lines[0:-idx]
+            break  # We reached the actual content
+
+    # Indent sub-lists (one level only, more is not required right now)
+    # Indentation is 2 spaces per markdown standard in this case, one
+    # is added by " ".join() later
+    lines = [(" " + line if line.startswith("- ") else line) for line in lines]
+
+    return " ".join(lines)
 
 
 def generate_node_documentation(nodeitem: NodeItem, category: arm_nodes.ArmNodeCategory):
@@ -114,7 +138,7 @@ def generate_node_documentation(nodeitem: NodeItem, category: arm_nodes.ArmNodeC
                     Document.add(UnorderedList(input_list))
 
                 socket_name, description = part[6:].split(":", 1)
-                description = " ".join(description.split()).replace("\n", "")
+                description = format_desc(description)
                 input_list.append(f"{InlineCode(socket_name)}: {description}")
 
             # Output sockets
@@ -125,7 +149,7 @@ def generate_node_documentation(nodeitem: NodeItem, category: arm_nodes.ArmNodeC
                     Document.add(UnorderedList(output_list))
 
                 socket_name, description = part[7:].split(":", 1)
-                description = " ".join(description.split()).replace("\n", "")
+                description = format_desc(description)
                 output_list.append(f"{InlineCode(socket_name)}: {description}")
 
             # Other UI options
@@ -136,7 +160,7 @@ def generate_node_documentation(nodeitem: NodeItem, category: arm_nodes.ArmNodeC
                     Document.add(UnorderedList(option_list))
 
                 option_name, description = part[7:].split(":", 1)
-                description = " ".join(description.split()).replace("\n", "")
+                description = format_desc(description)
                 option_list.append(f"{InlineCode(option_name)}: {description}")
 
             elif part.startswith("deprecated "):
