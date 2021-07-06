@@ -319,10 +319,10 @@ var arm2d_Assets = function() { };
 $hxClasses["arm2d.Assets"] = arm2d_Assets;
 arm2d_Assets.__name__ = true;
 arm2d_Assets.getImage = function(asset) {
-	return zui_Canvas.assetMap.h[asset.id];
+	return armory_ui_Canvas.assetMap.h[asset.id];
 };
 arm2d_Assets.getFont = function(asset) {
-	return zui_Canvas.assetMap.h[asset.id];
+	return armory_ui_Canvas.assetMap.h[asset.id];
 };
 arm2d_Assets.importAsset = function(canvas,path) {
 	var abspath = arm2d_Path.toAbsolute(path,Main.cwd);
@@ -333,9 +333,9 @@ arm2d_Assets.importAsset = function(canvas,path) {
 		kha_Assets.loadImageFromPath(abspath,false,function(image) {
 			var ar = path.split("/");
 			var name = ar[ar.length - 1];
-			var asset = { name : name, file : path, id : zui_Canvas.getAssetId(canvas)};
+			var asset = { name : name, file : path, id : armory_ui_Canvas.getAssetId(canvas)};
 			canvas.assets.push(asset);
-			zui_Canvas.assetMap.h[asset.id] = image;
+			armory_ui_Canvas.assetMap.h[asset.id] = image;
 			arm2d_Editor.assetNames.push(name);
 			arm2d_ui_UIProperties.hwin.redraws = 2;
 		},null,{ fileName : "arm2d/Assets.hx", lineNumber : 25, className : "arm2d.Assets", methodName : "importAsset"});
@@ -343,9 +343,9 @@ arm2d_Assets.importAsset = function(canvas,path) {
 		kha_Assets.loadFontFromPath(abspath,function(font) {
 			var ar = path.split("/");
 			var name = ar[ar.length - 1];
-			var asset = { name : name, file : path, id : zui_Canvas.getAssetId(canvas)};
+			var asset = { name : name, file : path, id : armory_ui_Canvas.getAssetId(canvas)};
 			canvas.assets.push(asset);
-			zui_Canvas.assetMap.h[asset.id] = font;
+			armory_ui_Canvas.assetMap.h[asset.id] = font;
 			arm2d_Editor.assetNames.push(name);
 			arm2d_ui_UIProperties.hwin.redraws = 2;
 		},null,{ fileName : "arm2d/Assets.hx", lineNumber : 37, className : "arm2d.Assets", methodName : "importAsset"});
@@ -359,23 +359,23 @@ arm2d_Assets.importThemes = function() {
 	}
 	try {
 		kha_Assets.loadBlobFromPath(themesPath,function(b) {
-			zui_Canvas.themes = JSON.parse(b.toString());
-			if(zui_Canvas.themes.length == 0) {
-				zui_Canvas.themes.push(Reflect.copy(zui_Themes.light));
+			armory_ui_Canvas.themes = JSON.parse(b.toString());
+			if(armory_ui_Canvas.themes.length == 0) {
+				armory_ui_Canvas.themes.push(Reflect.copy(armory_ui_Themes.light));
 			}
 			if(Main.inst != null) {
-				arm2d_Editor.selectedTheme = zui_Canvas.themes[0];
+				arm2d_Editor.selectedTheme = armory_ui_Canvas.themes[0];
 			}
 		},function(a) {
-			zui_Canvas.themes.push(Reflect.copy(zui_Themes.light));
+			armory_ui_Canvas.themes.push(Reflect.copy(armory_ui_Themes.light));
 			if(Main.inst != null) {
-				arm2d_Editor.selectedTheme = zui_Canvas.themes[0];
+				arm2d_Editor.selectedTheme = armory_ui_Canvas.themes[0];
 			}
 		},{ fileName : "arm2d/Assets.hx", lineNumber : 60, className : "arm2d.Assets", methodName : "importThemes"});
 	} catch( _g ) {
-		zui_Canvas.themes.push(Reflect.copy(zui_Themes.light));
+		armory_ui_Canvas.themes.push(Reflect.copy(armory_ui_Themes.light));
 		if(Main.inst != null) {
-			arm2d_Editor.selectedTheme = zui_Canvas.themes[0];
+			arm2d_Editor.selectedTheme = armory_ui_Canvas.themes[0];
 		}
 	}
 };
@@ -412,7 +412,7 @@ arm2d_Assets.saveAssets = function(canvas) {
 };
 arm2d_Assets.saveThemes = function() {
 	var themesPath = haxe_io_Path.join([haxe_io_Path.directory(Main.prefs.path),"_themes.json"]);
-	Krom.fileSaveBytes(themesPath,haxe_io_Bytes.ofString(JSON.stringify(zui_Canvas.themes)).b.bufferValue);
+	Krom.fileSaveBytes(themesPath,haxe_io_Bytes.ofString(JSON.stringify(armory_ui_Canvas.themes)).b.bufferValue);
 };
 arm2d_Assets.getEnumTexts = function() {
 	if(Main.inst == null) {
@@ -497,12 +497,12 @@ arm2d_Editor.prototype = {
 		var t = Reflect.copy(zui_Themes.dark);
 		t.FILL_WINDOW_BG = true;
 		this.ui = new zui_Zui({ scaleFactor : Main.prefs.scaleFactor, font : kha_Assets.fonts.font_default, theme : t, color_wheel : kha_Assets.images.color_wheel});
-		this.cui = new zui_Zui({ scaleFactor : 1.0, font : kha_Assets.fonts.font_default, autoNotifyInput : true, theme : Reflect.copy(zui_Canvas.getTheme(this.canvas.theme))});
+		this.cui = new zui_Zui({ scaleFactor : 1.0, font : kha_Assets.fonts.font_default, autoNotifyInput : true, theme : Reflect.copy(armory_ui_Canvas.getTheme(this.canvas.theme))});
 		this.uimodal = new zui_Zui({ font : kha_Assets.fonts.font_default, scaleFactor : Main.prefs.scaleFactor});
 		arm2d_ElementController.initialize(this.ui,this.cui);
-		if(zui_Canvas.getTheme(this.canvas.theme) == null) {
-			zui_Popup.showMessage(new zui_Zui(this.ui.ops),"Warning!","Theme \"" + this.canvas.theme + "\" was not found!" + ("\nUsing first theme in list instead: \"" + zui_Canvas.themes[0].NAME + "\""));
-			this.canvas.theme = zui_Canvas.themes[0].NAME;
+		if(armory_ui_Canvas.getTheme(this.canvas.theme) == null) {
+			armory_ui_Popup.showMessage(new zui_Zui(this.ui.ops),"Warning!","Theme \"" + this.canvas.theme + "\" was not found!" + ("\nUsing first theme in list instead: \"" + armory_ui_Canvas.themes[0].NAME + "\""));
+			this.canvas.theme = armory_ui_Canvas.themes[0].NAME;
 		}
 		kha_System.notifyOnDropFiles(function(path) {
 			_gthis.dropPath = StringTools.rtrim(path);
@@ -577,15 +577,18 @@ arm2d_Editor.prototype = {
 		g.end();
 	}
 	,onFrames: function(framebuffers) {
+		if(kha_System.windowWidth() == 0 || kha_System.windowHeight() == 0) {
+			return;
+		}
 		var framebuffer = framebuffers[0];
-		if(zui_Popup.show && this.ui.inputRegistered) {
+		if(armory_ui_Popup.show && this.ui.inputRegistered) {
 			this.ui.unregisterInput();
 			this.cui.unregisterInput();
-		} else if(!zui_Popup.show && !this.ui.inputRegistered) {
+		} else if(!armory_ui_Popup.show && !this.ui.inputRegistered) {
 			this.ui.registerInput();
 			this.cui.registerInput();
 		}
-		if(zui_Popup.show) {
+		if(armory_ui_Popup.show) {
 			arm2d_ui_UIProperties.hwin.redraws = 1;
 		}
 		if(this.dropPath != "") {
@@ -616,9 +619,9 @@ arm2d_Editor.prototype = {
 			g.set_color(-1);
 		}
 		g.drawRect(this.canvas.x + (this.canvas.width * this.cui.ops.scaleFactor | 0) - handleSize / 2,this.canvas.y + (this.canvas.height * this.cui.ops.scaleFactor | 0) - handleSize / 2,handleSize,handleSize,1);
-		zui_Canvas.screenW = this.canvas.width;
-		zui_Canvas.screenH = this.canvas.height;
-		zui_Canvas.draw(this.cui,this.canvas,g);
+		armory_ui_Canvas.screenW = this.canvas.width;
+		armory_ui_Canvas.screenH = this.canvas.height;
+		armory_ui_Canvas.draw(this.cui,this.canvas,g);
 		arm2d_ElementController.render(g,this.canvas);
 		if(arm2d_Editor.currentOperation != "") {
 			g.set_fontSize(14 * this.ui.ops.scaleFactor | 0);
@@ -677,8 +680,8 @@ arm2d_Editor.prototype = {
 		if(arm2d_Editor.showFiles) {
 			this.renderFiles(g);
 		}
-		if(zui_Popup.show) {
-			zui_Popup.render(g);
+		if(armory_ui_Popup.show) {
+			armory_ui_Popup.render(g);
 		}
 	}
 	,acceptDrag: function(index) {
@@ -718,8 +721,8 @@ arm2d_Editor.prototype = {
 			}
 		}
 		arm2d_ElementController.update(this.ui,this.cui,this.canvas);
-		if(zui_Popup.show) {
-			zui_Popup.update();
+		if(armory_ui_Popup.show) {
+			armory_ui_Popup.update();
 		}
 		this.updateFiles();
 	}
@@ -849,7 +852,7 @@ arm2d_ElementController.selectElement = function(canvas) {
 		while(_g < sorted_elements.length) {
 			var elem = sorted_elements[_g];
 			++_g;
-			var anchorOffset = zui_Canvas.getAnchorOffset(canvas,elem);
+			var anchorOffset = armory_ui_Canvas.getAnchorOffset(canvas,elem);
 			var ex = (arm2d_tools_Math.absx(canvas,elem) * arm2d_ElementController.cui.ops.scaleFactor | 0) + anchorOffset[0];
 			var ey = (arm2d_tools_Math.absy(canvas,elem) * arm2d_ElementController.cui.ops.scaleFactor | 0) + anchorOffset[1];
 			var ew = elem.width * arm2d_ElementController.cui.ops.scaleFactor | 0;
@@ -872,7 +875,7 @@ arm2d_ElementController.selectElement = function(canvas) {
 };
 arm2d_ElementController.render = function(g,canvas) {
 	if(arm2d_Editor.selectedElem != null) {
-		var anchorOffset = zui_Canvas.getAnchorOffset(canvas,arm2d_Editor.selectedElem);
+		var anchorOffset = armory_ui_Canvas.getAnchorOffset(canvas,arm2d_Editor.selectedElem);
 		var ex = (arm2d_tools_Math.absx(canvas,arm2d_Editor.selectedElem) * arm2d_ElementController.cui.ops.scaleFactor | 0) + anchorOffset[0];
 		var ey = (arm2d_tools_Math.absy(canvas,arm2d_Editor.selectedElem) * arm2d_ElementController.cui.ops.scaleFactor | 0) + anchorOffset[1];
 		var ew = arm2d_Editor.selectedElem.width * arm2d_ElementController.cui.ops.scaleFactor | 0;
@@ -972,7 +975,7 @@ arm2d_ElementController.update = function(ui,cui,canvas) {
 	}
 	if(arm2d_Editor.selectedElem != null) {
 		var elem = arm2d_Editor.selectedElem;
-		var anchorOffset = zui_Canvas.getAnchorOffset(canvas,elem);
+		var anchorOffset = armory_ui_Canvas.getAnchorOffset(canvas,elem);
 		var ex = (arm2d_tools_Math.absx(canvas,elem) * arm2d_ElementController.cui.ops.scaleFactor | 0) + anchorOffset[0];
 		var ey = (arm2d_tools_Math.absy(canvas,elem) * arm2d_ElementController.cui.ops.scaleFactor | 0) + anchorOffset[1];
 		var ew = elem.width * arm2d_ElementController.cui.ops.scaleFactor | 0;
@@ -1381,7 +1384,7 @@ arm2d_tools_CanvasTools.makeElem = function(cui,canvas,type) {
 		name = arm2d_tools_CanvasTools.unique("TextArea",canvas.elements,"name");
 		break;
 	}
-	var elem = { id : zui_Canvas.getElementId(canvas), type : type, name : name, event : "", x : 0, y : 0, width : 150, height : height, rotation : 0, text : "My " + name, asset : "", progress_at : 0, progress_total : 100, strength : 1, alignment : js_Boot.__cast(alignment , Int), anchor : 0, parent : null, children : [], visible : true};
+	var elem = { id : armory_ui_Canvas.getElementId(canvas), type : type, name : name, event : "", x : 0, y : 0, width : 150, height : height, rotation : 0, text : "My " + name, asset : "", progress_at : 0, progress_total : 100, strength : 1, alignment : js_Boot.__cast(alignment , Int), anchor : 0, parent : null, children : [], visible : true};
 	canvas.elements.push(elem);
 	return elem;
 };
@@ -1497,7 +1500,7 @@ arm2d_tools_CanvasTools.duplicateElem = function(canvas,elem,parentId) {
 		if(parentId == null) {
 			parentId = elem.parent;
 		}
-		var dupe = { id : zui_Canvas.getElementId(canvas), type : elem.type, name : elem.name, event : elem.event, x : elem.x + 10, y : elem.y + 10, width : elem.width, height : elem.height, rotation : elem.rotation, text : elem.text, asset : elem.asset, color : elem.color, color_text : elem.color_text, color_hover : elem.color_hover, color_press : elem.color_press, color_progress : elem.color_progress, progress_at : elem.progress_at, progress_total : elem.progress_total, strength : elem.strength, anchor : elem.anchor, parent : parentId, children : [], visible : elem.visible};
+		var dupe = { id : armory_ui_Canvas.getElementId(canvas), type : elem.type, name : elem.name, event : elem.event, x : elem.x + 10, y : elem.y + 10, width : elem.width, height : elem.height, rotation : elem.rotation, text : elem.text, asset : elem.asset, color : elem.color, color_text : elem.color_text, color_hover : elem.color_hover, color_press : elem.color_press, color_progress : elem.color_progress, progress_at : elem.progress_at, progress_total : elem.progress_total, strength : elem.strength, anchor : elem.anchor, parent : parentId, children : [], visible : elem.visible};
 		canvas.elements.push(dupe);
 		if(parentId != null) {
 			var parentElem = arm2d_tools_CanvasTools.elemById(canvas,parentId);
@@ -1710,7 +1713,7 @@ arm2d_ui_UIProperties.renderProperties = function(ui,width,canvas) {
 				ui.textInput(handleName,"Name",2);
 				if(handleName.changed) {
 					if(handleName.text == "_themes") {
-						zui_Popup.showMessage(new zui_Zui(ui.ops),"Sorry!","\"_themes\" is not a valid canvas name as it is reserved!");
+						armory_ui_Popup.showMessage(new zui_Zui(ui.ops),"Sorry!","\"_themes\" is not a valid canvas name as it is reserved!");
 						handleName.text = canvas.name;
 					} else {
 						canvas.name = handleName.text;
@@ -1867,7 +1870,7 @@ arm2d_ui_UIProperties.renderProperties = function(ui,width,canvas) {
 					var drawColorSelection = function(idMult,color,defaultColor) {
 						ui.row([0.5,0.5]);
 						var handleCol = zui_Handle.global.nest(24,null).nest(id).nest(idMult,{ color : color != null ? color : defaultColor});
-						zui_Ext.colorField(ui,handleCol,true);
+						armory_ui_Ext.colorField(ui,handleCol,true);
 						if(handleCol.changed) {
 							color = handleCol.color;
 						}
@@ -1878,7 +1881,7 @@ arm2d_ui_UIProperties.renderProperties = function(ui,width,canvas) {
 						}
 						return color;
 					};
-					var canvasTheme = zui_Canvas.getTheme(canvas.theme);
+					var canvasTheme = armory_ui_Canvas.getTheme(canvas.theme);
 					switch(elem.type) {
 					case 0:
 						ui.text("Text:");
@@ -1963,7 +1966,7 @@ arm2d_ui_UIProperties.renderProperties = function(ui,width,canvas) {
 					ui.g.fillRect(0,ui._y,ui._windowW,ui.t.ELEMENT_H * ui.ops.scaleFactor);
 					ui.g.set_color(-1);
 				}
-				if(theme == zui_Canvas.getTheme(canvas.theme)) {
+				if(theme == armory_ui_Canvas.getTheme(canvas.theme)) {
 					var iconMargin = (ui.t.BUTTON_H - iconSize) / 2;
 					ui.g.drawSubImage(kha_Assets.images.icons,ui._x + iconMargin,ui._y + iconMargin,0,0,16,16);
 				}
@@ -1976,7 +1979,7 @@ arm2d_ui_UIProperties.renderProperties = function(ui,width,canvas) {
 				ui._x -= iconSize;
 			};
 			var _g = 0;
-			var _g1 = zui_Canvas.themes;
+			var _g1 = armory_ui_Canvas.themes;
 			while(_g < _g1.length) {
 				var theme = _g1[_g];
 				++_g;
@@ -1984,9 +1987,9 @@ arm2d_ui_UIProperties.renderProperties = function(ui,width,canvas) {
 			}
 			ui.row([0.25,0.25,0.25,0.25]);
 			if(ui.button("Add")) {
-				var newTheme = Reflect.copy(zui_Themes.light);
-				newTheme.NAME = arm2d_tools_CanvasTools.unique("New Theme",zui_Canvas.themes,"NAME");
-				zui_Canvas.themes.push(newTheme);
+				var newTheme = Reflect.copy(armory_ui_Themes.light);
+				newTheme.NAME = arm2d_tools_CanvasTools.unique("New Theme",armory_ui_Canvas.themes,"NAME");
+				armory_ui_Canvas.themes.push(newTheme);
 				arm2d_Editor.selectedTheme = newTheme;
 			}
 			if(arm2d_Editor.selectedTheme == null) {
@@ -1994,21 +1997,21 @@ arm2d_ui_UIProperties.renderProperties = function(ui,width,canvas) {
 			}
 			if(ui.button("Copy")) {
 				var newTheme = Reflect.copy(arm2d_Editor.selectedTheme);
-				newTheme.NAME = arm2d_tools_CanvasTools.unique(newTheme.NAME,zui_Canvas.themes,"NAME");
-				zui_Canvas.themes.push(newTheme);
+				newTheme.NAME = arm2d_tools_CanvasTools.unique(newTheme.NAME,armory_ui_Canvas.themes,"NAME");
+				armory_ui_Canvas.themes.push(newTheme);
 				arm2d_Editor.selectedTheme = newTheme;
 			}
 			ui.enabled = true;
 			if(arm2d_Editor.selectedTheme == null) {
 				ui.enabled = false;
 			}
-			var hName = handleThemeName.nest(zui_Canvas.themes.indexOf(arm2d_Editor.selectedTheme));
+			var hName = handleThemeName.nest(armory_ui_Canvas.themes.indexOf(arm2d_Editor.selectedTheme));
 			if(ui.button("Rename")) {
 				hName.text = arm2d_Editor.selectedTheme.NAME;
-				zui_Popup.showCustom(new zui_Zui(ui.ops),function(ui) {
+				armory_ui_Popup.showCustom(new zui_Zui(ui.ops),function(ui) {
 					ui.textInput(hName);
 					if(ui.button("OK")) {
-						zui_Popup.show = false;
+						armory_ui_Popup.show = false;
 						arm2d_ui_UIProperties.hwin.redraws = 2;
 					}
 				},ui.inputX | 0,ui.inputY | 0,200,60);
@@ -2016,7 +2019,7 @@ arm2d_ui_UIProperties.renderProperties = function(ui,width,canvas) {
 			if(arm2d_Editor.selectedTheme != null) {
 				var name = arm2d_Editor.selectedTheme.NAME;
 				if(hName.changed && arm2d_Editor.selectedTheme.NAME != hName.text) {
-					name = arm2d_tools_CanvasTools.unique(hName.text,zui_Canvas.themes,"NAME");
+					name = arm2d_tools_CanvasTools.unique(hName.text,armory_ui_Canvas.themes,"NAME");
 					if(canvas.theme == arm2d_Editor.selectedTheme.NAME) {
 						canvas.theme = name;
 					}
@@ -2024,15 +2027,15 @@ arm2d_ui_UIProperties.renderProperties = function(ui,width,canvas) {
 				}
 			}
 			ui.enabled = true;
-			if(zui_Canvas.themes.length == 1 || arm2d_Editor.selectedTheme == null) {
+			if(armory_ui_Canvas.themes.length == 1 || arm2d_Editor.selectedTheme == null) {
 				ui.enabled = false;
 			}
 			if(ui.button("Delete")) {
-				handleThemeColor.unnest(zui_Canvas.themes.indexOf(arm2d_Editor.selectedTheme));
-				handleThemeName.unnest(zui_Canvas.themes.indexOf(arm2d_Editor.selectedTheme));
-				HxOverrides.remove(zui_Canvas.themes,arm2d_Editor.selectedTheme);
-				if(zui_Canvas.getTheme(canvas.theme) == null) {
-					canvas.theme = zui_Canvas.themes[0].NAME;
+				handleThemeColor.unnest(armory_ui_Canvas.themes.indexOf(arm2d_Editor.selectedTheme));
+				handleThemeName.unnest(armory_ui_Canvas.themes.indexOf(arm2d_Editor.selectedTheme));
+				HxOverrides.remove(armory_ui_Canvas.themes,arm2d_Editor.selectedTheme);
+				if(armory_ui_Canvas.getTheme(canvas.theme) == null) {
+					canvas.theme = armory_ui_Canvas.themes[0].NAME;
 				}
 				arm2d_Editor.selectedTheme = null;
 			}
@@ -2063,8 +2066,8 @@ arm2d_ui_UIProperties.renderProperties = function(ui,width,canvas) {
 							ui.row([0.66666666666666663,0.33333333333333331]);
 							ui.text(themeColorOption);
 							var themeColor = Reflect.getProperty(arm2d_Editor.selectedTheme,themeColorOption);
-							var handleCol = handleThemeColor.nest(zui_Canvas.themes.indexOf(arm2d_Editor.selectedTheme)).nest(idxCategory).nest(idxElemAttribs,{ color : themeColor});
-							var col = zui_Ext.colorField(ui,handleCol,true);
+							var handleCol = handleThemeColor.nest(armory_ui_Canvas.themes.indexOf(arm2d_Editor.selectedTheme)).nest(idxCategory).nest(idxElemAttribs,{ color : themeColor});
+							var col = armory_ui_Ext.colorField(ui,handleCol,true);
 							Reflect.setProperty(arm2d_Editor.selectedTheme,themeColorOption,col);
 						}
 						ui.unindent();
@@ -2179,7 +2182,7 @@ arm2d_ui_UIProperties.renderProperties = function(ui,width,canvas) {
 				ui.text("Grab");
 				var ui1 = ui;
 				var tmp = zui_Handle.global.nest(50,{ value : 71});
-				Main.prefs.keyMap.grabKey = zui_Ext.keyInput(ui1,tmp,"Key");
+				Main.prefs.keyMap.grabKey = armory_ui_Ext.keyInput(ui1,tmp,"Key");
 				if(ui.isHovered) {
 					ui.tooltip("Key used for grabbing elements");
 				}
@@ -2187,7 +2190,7 @@ arm2d_ui_UIProperties.renderProperties = function(ui,width,canvas) {
 				ui.text("Rotate");
 				var ui1 = ui;
 				var tmp = zui_Handle.global.nest(51,{ value : 82});
-				Main.prefs.keyMap.rotateKey = zui_Ext.keyInput(ui1,tmp,"Key");
+				Main.prefs.keyMap.rotateKey = armory_ui_Ext.keyInput(ui1,tmp,"Key");
 				if(ui.isHovered) {
 					ui.tooltip("Key used for rotating elements");
 				}
@@ -2195,7 +2198,7 @@ arm2d_ui_UIProperties.renderProperties = function(ui,width,canvas) {
 				ui.text("Size");
 				var ui1 = ui;
 				var tmp = zui_Handle.global.nest(52,{ value : 83});
-				Main.prefs.keyMap.sizeKey = zui_Ext.keyInput(ui1,tmp,"Key");
+				Main.prefs.keyMap.sizeKey = armory_ui_Ext.keyInput(ui1,tmp,"Key");
 				if(ui.isHovered) {
 					ui.tooltip("Key used for resizing elements");
 				}
@@ -2204,7 +2207,7 @@ arm2d_ui_UIProperties.renderProperties = function(ui,width,canvas) {
 				ui.text("Precision Transform");
 				var ui1 = ui;
 				var tmp = zui_Handle.global.nest(53,{ value : 16});
-				Main.prefs.keyMap.slowMovement = zui_Ext.keyInput(ui1,tmp,"Key");
+				Main.prefs.keyMap.slowMovement = armory_ui_Ext.keyInput(ui1,tmp,"Key");
 				if(ui.isHovered) {
 					ui.tooltip("More precise transformations");
 				}
@@ -2212,7 +2215,7 @@ arm2d_ui_UIProperties.renderProperties = function(ui,width,canvas) {
 				ui.text("Invert Grid");
 				var ui1 = ui;
 				var tmp = zui_Handle.global.nest(54,{ value : 17});
-				Main.prefs.keyMap.gridInvert = zui_Ext.keyInput(ui1,tmp,"Key");
+				Main.prefs.keyMap.gridInvert = armory_ui_Ext.keyInput(ui1,tmp,"Key");
 				if(ui.isHovered) {
 					ui.tooltip("Invert the grid setting");
 				}
@@ -2220,7 +2223,7 @@ arm2d_ui_UIProperties.renderProperties = function(ui,width,canvas) {
 				ui.text("Invert Rel. Grid");
 				var ui1 = ui;
 				var tmp = zui_Handle.global.nest(55,{ value : 18});
-				Main.prefs.keyMap.gridInvertRelative = zui_Ext.keyInput(ui1,tmp,"Key");
+				Main.prefs.keyMap.gridInvertRelative = armory_ui_Ext.keyInput(ui1,tmp,"Key");
 				if(ui.isHovered) {
 					ui.tooltip("Invert the relative grid setting");
 				}
@@ -2243,134 +2246,1166 @@ arm2d_ui_UIToolBar.renderToolbar = function(ui,cui,canvas,width) {
 		ui.text("Add Elements:");
 		if(ui.panel(zui_Handle.global.nest(58,{ selected : true}),"Basic")) {
 			ui.indent();
-			if(ui.button("Empty")) {
-				arm2d_Editor.selectedElem = arm2d_tools_CanvasTools.makeElem(cui,canvas,3);
-			}
-			if(ui.isHovered) {
-				ui.tooltip("Creates empty element");
-			}
-			if(ui.button("Text")) {
-				arm2d_Editor.selectedElem = arm2d_tools_CanvasTools.makeElem(cui,canvas,0);
-			}
-			if(ui.isHovered) {
-				ui.tooltip("Create text element");
-			}
-			if(ui.button("Image")) {
-				arm2d_Editor.selectedElem = arm2d_tools_CanvasTools.makeElem(cui,canvas,1);
-			}
-			if(ui.isHovered) {
-				ui.tooltip("Creates image element");
-			}
+			arm2d_ui_UIToolBar.drawToolbarItem(ui,cui,canvas,"Empty",3,"Create an empty element");
+			arm2d_ui_UIToolBar.drawToolbarItem(ui,cui,canvas,"Text",0,"Create a text element");
+			arm2d_ui_UIToolBar.drawToolbarItem(ui,cui,canvas,"Image",1,"Create an image element");
 			ui.unindent();
 		}
 		if(ui.panel(zui_Handle.global.nest(59,{ selected : true}),"Buttons")) {
 			ui.indent();
-			if(ui.button("Button")) {
-				arm2d_Editor.selectedElem = arm2d_tools_CanvasTools.makeElem(cui,canvas,2);
-			}
-			if(ui.isHovered) {
-				ui.tooltip("Creates button element");
-			}
-			if(ui.button("Check")) {
-				arm2d_Editor.selectedElem = arm2d_tools_CanvasTools.makeElem(cui,canvas,6);
-			}
-			if(ui.isHovered) {
-				ui.tooltip("Creates check box element");
-			}
-			if(ui.button("Radio")) {
-				arm2d_Editor.selectedElem = arm2d_tools_CanvasTools.makeElem(cui,canvas,7);
-			}
-			if(ui.isHovered) {
-				ui.tooltip("Creates inline-radio element");
-			}
+			arm2d_ui_UIToolBar.drawToolbarItem(ui,cui,canvas,"Button",2,"Create a button element");
+			arm2d_ui_UIToolBar.drawToolbarItem(ui,cui,canvas,"Check",6,"Create a checkbox element");
+			arm2d_ui_UIToolBar.drawToolbarItem(ui,cui,canvas,"Radio",7,"Create a inline-radio element");
 			ui.unindent();
 		}
 		if(ui.panel(zui_Handle.global.nest(60,{ selected : true}),"Inputs")) {
 			ui.indent();
-			if(ui.button("Text Input")) {
-				arm2d_Editor.selectedElem = arm2d_tools_CanvasTools.makeElem(cui,canvas,10);
-			}
-			if(ui.isHovered) {
-				ui.tooltip("Creates text input element");
-			}
-			if(ui.button("Key Input")) {
-				arm2d_Editor.selectedElem = arm2d_tools_CanvasTools.makeElem(cui,canvas,11);
-			}
-			if(ui.isHovered) {
-				ui.tooltip("Creates key input element");
-			}
-			if(ui.button("Combo Box")) {
-				arm2d_Editor.selectedElem = arm2d_tools_CanvasTools.makeElem(cui,canvas,8);
-			}
-			if(ui.isHovered) {
-				ui.tooltip("Creates combo box element");
-			}
-			if(ui.button("Slider")) {
-				arm2d_Editor.selectedElem = arm2d_tools_CanvasTools.makeElem(cui,canvas,9);
-			}
-			if(ui.isHovered) {
-				ui.tooltip("Creates slider element");
-			}
+			arm2d_ui_UIToolBar.drawToolbarItem(ui,cui,canvas,"Text Input",10,"Create a text input element");
+			arm2d_ui_UIToolBar.drawToolbarItem(ui,cui,canvas,"Text Area",20,"Create a text area element");
+			arm2d_ui_UIToolBar.drawToolbarItem(ui,cui,canvas,"Key Input",11,"Create a key input element");
+			arm2d_ui_UIToolBar.drawToolbarItem(ui,cui,canvas,"Combo Box",8,"Create a combo box element");
+			arm2d_ui_UIToolBar.drawToolbarItem(ui,cui,canvas,"Slider",9,"Create a slider element");
 			ui.unindent();
 		}
 		if(ui.panel(zui_Handle.global.nest(61,{ selected : true}),"Shapes")) {
 			ui.indent();
-			if(ui.button("Rect")) {
-				arm2d_Editor.selectedElem = arm2d_tools_CanvasTools.makeElem(cui,canvas,13);
-			}
-			if(ui.isHovered) {
-				ui.tooltip("Creates rectangle shaped element");
-			}
-			if(ui.button("Fill Rect")) {
-				arm2d_Editor.selectedElem = arm2d_tools_CanvasTools.makeElem(cui,canvas,12);
-			}
-			if(ui.isHovered) {
-				ui.tooltip("Creates filled rectangle shaped element");
-			}
-			if(ui.button("Circle")) {
-				arm2d_Editor.selectedElem = arm2d_tools_CanvasTools.makeElem(cui,canvas,15);
-			}
-			if(ui.isHovered) {
-				ui.tooltip("Creates circle shaped element");
-			}
-			if(ui.button("Fill Circle")) {
-				arm2d_Editor.selectedElem = arm2d_tools_CanvasTools.makeElem(cui,canvas,14);
-			}
-			if(ui.isHovered) {
-				ui.tooltip("Creates filled circle shaped element");
-			}
-			if(ui.button("Triangle")) {
-				arm2d_Editor.selectedElem = arm2d_tools_CanvasTools.makeElem(cui,canvas,17);
-			}
-			if(ui.isHovered) {
-				ui.tooltip("Creates triangle shaped element");
-			}
-			if(ui.button("Fill Triangle")) {
-				arm2d_Editor.selectedElem = arm2d_tools_CanvasTools.makeElem(cui,canvas,16);
-			}
-			if(ui.isHovered) {
-				ui.tooltip("Creates filled triangle shaped element");
-			}
+			arm2d_ui_UIToolBar.drawToolbarItem(ui,cui,canvas,"Rect",13,"Create a rectangle shape element");
+			arm2d_ui_UIToolBar.drawToolbarItem(ui,cui,canvas,"Fill Rect",12,"Create a filled rectangle shape element");
+			arm2d_ui_UIToolBar.drawToolbarItem(ui,cui,canvas,"Circle",15,"Create a circle shape element");
+			arm2d_ui_UIToolBar.drawToolbarItem(ui,cui,canvas,"Fill Circle",14,"Create a filled circle shape element");
+			arm2d_ui_UIToolBar.drawToolbarItem(ui,cui,canvas,"Triangle",17,"Create a triangle shape element");
+			arm2d_ui_UIToolBar.drawToolbarItem(ui,cui,canvas,"Fill Triangle",16,"Create a filled triangle shape element");
 			ui.unindent();
 		}
-		if(ui.panel(zui_Handle.global.nest(62,{ selected : true}),"ProgressBars")) {
+		if(ui.panel(zui_Handle.global.nest(62,{ selected : true}),"Progress Bars")) {
 			ui.indent();
-			if(ui.button("RectPB")) {
-				arm2d_Editor.selectedElem = arm2d_tools_CanvasTools.makeElem(cui,canvas,18);
-			}
-			if(ui.isHovered) {
-				ui.tooltip("Creates rectangular progress bar");
-			}
-			if(ui.button("CircularPB")) {
-				arm2d_Editor.selectedElem = arm2d_tools_CanvasTools.makeElem(cui,canvas,19);
-			}
-			if(ui.isHovered) {
-				ui.tooltip("Creates circular progress bar");
-			}
+			arm2d_ui_UIToolBar.drawToolbarItem(ui,cui,canvas,"RectPB",18,"Create a rectangular progress bar");
+			arm2d_ui_UIToolBar.drawToolbarItem(ui,cui,canvas,"CircularPB",19,"Create a circular progress bar");
 			ui.unindent();
 		}
 	}
 };
+arm2d_ui_UIToolBar.drawToolbarItem = function(ui,cui,canvas,label,elemType,tooltip) {
+	if(ui.button(label)) {
+		arm2d_Editor.selectedElem = arm2d_tools_CanvasTools.makeElem(cui,canvas,elemType);
+	}
+	if(ui.isHovered) {
+		ui.tooltip(tooltip);
+	}
+};
+var armory_ui_Canvas = function() { };
+$hxClasses["armory.ui.Canvas"] = armory_ui_Canvas;
+armory_ui_Canvas.__name__ = true;
+armory_ui_Canvas.draw = function(ui,canvas,g) {
+	armory_ui_Canvas.screenW = kha_System.windowWidth();
+	armory_ui_Canvas.screenH = kha_System.windowHeight();
+	armory_ui_Canvas.events.length = 0;
+	armory_ui_Canvas._ui = ui;
+	g.end();
+	ui.begin(g);
+	g.begin(false);
+	ui.g = g;
+	var _g = 0;
+	var _g1 = canvas.elements;
+	while(_g < _g1.length) {
+		var elem = _g1[_g];
+		++_g;
+		if(elem.parent == null) {
+			armory_ui_Canvas.drawElement(ui,canvas,elem);
+		}
+	}
+	g.end();
+	ui.end();
+	g.begin(false);
+	return armory_ui_Canvas.events;
+};
+armory_ui_Canvas.drawElement = function(ui,canvas,element,px,py) {
+	if(py == null) {
+		py = 0.0;
+	}
+	if(px == null) {
+		px = 0.0;
+	}
+	if(element == null || element.visible == false) {
+		return;
+	}
+	var anchorOffset = armory_ui_Canvas.getAnchorOffset(canvas,element);
+	px += anchorOffset[0];
+	py += anchorOffset[1];
+	ui._x = canvas.x + (element.x * armory_ui_Canvas._ui.ops.scaleFactor | 0) + px;
+	ui._y = canvas.y + (element.y * armory_ui_Canvas._ui.ops.scaleFactor | 0) + py;
+	ui._w = element.width * armory_ui_Canvas._ui.ops.scaleFactor | 0;
+	var rotated = element.rotation != null && element.rotation != 0;
+	if(rotated) {
+		ui.g.pushRotation(element.rotation,ui._x + (element.width * armory_ui_Canvas._ui.ops.scaleFactor | 0) / 2,ui._y + (element.height * armory_ui_Canvas._ui.ops.scaleFactor | 0) / 2);
+	}
+	switch(element.type) {
+	case 0:
+		var font = ui.ops.font;
+		var size = ui.fontSize;
+		var fontAsset = element.asset != null && StringTools.endsWith(element.asset,".ttf");
+		if(fontAsset) {
+			ui.ops.font = armory_ui_Canvas.getAsset(canvas,element.asset);
+		}
+		ui.fontSize = element.height * armory_ui_Canvas._ui.ops.scaleFactor | 0;
+		var color = element.color_text;
+		var defaultColor = armory_ui_Canvas.getTheme(canvas.theme).TEXT_COL;
+		ui.t.TEXT_COL = color != null ? color : defaultColor;
+		ui.text(element.text,element.alignment);
+		ui.ops.font = font;
+		ui.fontSize = size;
+		break;
+	case 1:
+		var image = armory_ui_Canvas.getAsset(canvas,element.asset);
+		var fontAsset = element.asset != null && StringTools.endsWith(element.asset,".ttf");
+		if(image != null && !fontAsset) {
+			ui.imageScrollAlign = false;
+			var tint = element.color != null ? element.color : -1;
+			if(ui.image(image,tint,element.height * armory_ui_Canvas._ui.ops.scaleFactor | 0) == 3) {
+				var e = element.event;
+				if(e != null && e != "") {
+					armory_ui_Canvas.events.push(e);
+				}
+			}
+			ui.imageScrollAlign = true;
+		}
+		break;
+	case 2:
+		var eh = ui.t.ELEMENT_H;
+		var bh = ui.t.BUTTON_H;
+		ui.t.ELEMENT_H = element.height;
+		ui.t.BUTTON_H = element.height;
+		var color = element.color;
+		var defaultColor = armory_ui_Canvas.getTheme(canvas.theme).BUTTON_COL;
+		ui.t.BUTTON_COL = color != null ? color : defaultColor;
+		var color = element.color_text;
+		var defaultColor = armory_ui_Canvas.getTheme(canvas.theme).BUTTON_TEXT_COL;
+		ui.t.BUTTON_TEXT_COL = color != null ? color : defaultColor;
+		var color = element.color_hover;
+		var defaultColor = armory_ui_Canvas.getTheme(canvas.theme).BUTTON_HOVER_COL;
+		ui.t.BUTTON_HOVER_COL = color != null ? color : defaultColor;
+		var color = element.color_press;
+		var defaultColor = armory_ui_Canvas.getTheme(canvas.theme).BUTTON_PRESSED_COL;
+		ui.t.BUTTON_PRESSED_COL = color != null ? color : defaultColor;
+		if(ui.button(element.text,element.alignment)) {
+			var e = element.event;
+			if(e != null && e != "") {
+				armory_ui_Canvas.events.push(e);
+			}
+		}
+		ui.t.ELEMENT_H = eh;
+		ui.t.BUTTON_H = bh;
+		break;
+	case 3:
+		break;
+	case 6:
+		var color = element.color_text;
+		var defaultColor = armory_ui_Canvas.getTheme(canvas.theme).TEXT_COL;
+		ui.t.TEXT_COL = color != null ? color : defaultColor;
+		var color = element.color;
+		var defaultColor = armory_ui_Canvas.getTheme(canvas.theme).BUTTON_COL;
+		ui.t.ACCENT_COL = color != null ? color : defaultColor;
+		var color = element.color_hover;
+		var defaultColor = armory_ui_Canvas.getTheme(canvas.theme).BUTTON_HOVER_COL;
+		ui.t.ACCENT_HOVER_COL = color != null ? color : defaultColor;
+		ui.check(armory_ui_Canvas.h.nest(element.id),element.text);
+		break;
+	case 7:
+		var color = element.color_text;
+		var defaultColor = armory_ui_Canvas.getTheme(canvas.theme).TEXT_COL;
+		ui.t.TEXT_COL = color != null ? color : defaultColor;
+		var color = element.color;
+		var defaultColor = armory_ui_Canvas.getTheme(canvas.theme).BUTTON_COL;
+		ui.t.ACCENT_COL = color != null ? color : defaultColor;
+		var color = element.color_hover;
+		var defaultColor = armory_ui_Canvas.getTheme(canvas.theme).BUTTON_HOVER_COL;
+		ui.t.ACCENT_HOVER_COL = color != null ? color : defaultColor;
+		zui_Ext.inlineRadio(ui,armory_ui_Canvas.h.nest(element.id),element.text.split(";"));
+		break;
+	case 8:
+		var color = element.color_text;
+		var defaultColor = armory_ui_Canvas.getTheme(canvas.theme).TEXT_COL;
+		ui.t.TEXT_COL = color != null ? color : defaultColor;
+		var color = element.color_text;
+		var defaultColor = armory_ui_Canvas.getTheme(canvas.theme).TEXT_COL;
+		ui.t.LABEL_COL = color != null ? color : defaultColor;
+		var color = element.color;
+		var defaultColor = armory_ui_Canvas.getTheme(canvas.theme).BUTTON_COL;
+		ui.t.ACCENT_COL = color != null ? color : defaultColor;
+		var color = element.color;
+		var defaultColor = armory_ui_Canvas.getTheme(canvas.theme).BUTTON_COL;
+		ui.t.SEPARATOR_COL = color != null ? color : defaultColor;
+		var color = element.color_hover;
+		var defaultColor = armory_ui_Canvas.getTheme(canvas.theme).BUTTON_HOVER_COL;
+		ui.t.ACCENT_HOVER_COL = color != null ? color : defaultColor;
+		ui.combo(armory_ui_Canvas.h.nest(element.id),element.text.split(";"));
+		break;
+	case 9:
+		var color = element.color_text;
+		var defaultColor = armory_ui_Canvas.getTheme(canvas.theme).TEXT_COL;
+		ui.t.TEXT_COL = color != null ? color : defaultColor;
+		var color = element.color_text;
+		var defaultColor = armory_ui_Canvas.getTheme(canvas.theme).TEXT_COL;
+		ui.t.LABEL_COL = color != null ? color : defaultColor;
+		var color = element.color;
+		var defaultColor = armory_ui_Canvas.getTheme(canvas.theme).BUTTON_COL;
+		ui.t.ACCENT_COL = color != null ? color : defaultColor;
+		var color = element.color_hover;
+		var defaultColor = armory_ui_Canvas.getTheme(canvas.theme).BUTTON_HOVER_COL;
+		ui.t.ACCENT_HOVER_COL = color != null ? color : defaultColor;
+		ui.slider(armory_ui_Canvas.h.nest(element.id),element.text,0.0,1.0,true,100,true,element.alignment);
+		break;
+	case 10:
+		var color = element.color_text;
+		var defaultColor = armory_ui_Canvas.getTheme(canvas.theme).TEXT_COL;
+		ui.t.TEXT_COL = color != null ? color : defaultColor;
+		var color = element.color_text;
+		var defaultColor = armory_ui_Canvas.getTheme(canvas.theme).TEXT_COL;
+		ui.t.LABEL_COL = color != null ? color : defaultColor;
+		var color = element.color;
+		var defaultColor = armory_ui_Canvas.getTheme(canvas.theme).BUTTON_COL;
+		ui.t.ACCENT_COL = color != null ? color : defaultColor;
+		var color = element.color_hover;
+		var defaultColor = armory_ui_Canvas.getTheme(canvas.theme).BUTTON_HOVER_COL;
+		ui.t.ACCENT_HOVER_COL = color != null ? color : defaultColor;
+		ui.textInput(armory_ui_Canvas.h.nest(element.id),element.text,element.alignment);
+		if(armory_ui_Canvas.h.nest(element.id).changed) {
+			var e = element.event;
+			if(e != null && e != "") {
+				armory_ui_Canvas.events.push(e);
+			}
+		}
+		break;
+	case 11:
+		var color = element.color_text;
+		var defaultColor = armory_ui_Canvas.getTheme(canvas.theme).TEXT_COL;
+		ui.t.TEXT_COL = color != null ? color : defaultColor;
+		var color = element.color_text;
+		var defaultColor = armory_ui_Canvas.getTheme(canvas.theme).TEXT_COL;
+		ui.t.LABEL_COL = color != null ? color : defaultColor;
+		var color = element.color;
+		var defaultColor = armory_ui_Canvas.getTheme(canvas.theme).BUTTON_COL;
+		ui.t.ACCENT_COL = color != null ? color : defaultColor;
+		var color = element.color_hover;
+		var defaultColor = armory_ui_Canvas.getTheme(canvas.theme).BUTTON_HOVER_COL;
+		ui.t.ACCENT_HOVER_COL = color != null ? color : defaultColor;
+		armory_ui_Ext.keyInput(ui,armory_ui_Canvas.h.nest(element.id),element.text);
+		break;
+	case 12:
+		var col = ui.g.get_color();
+		var ui1 = ui.g;
+		var color = element.color;
+		var defaultColor = armory_ui_Canvas.getTheme(canvas.theme).BUTTON_COL;
+		ui1.set_color(color != null ? color : defaultColor);
+		ui.g.fillRect(ui._x,ui._y,ui._w,element.height * armory_ui_Canvas._ui.ops.scaleFactor | 0);
+		ui.g.set_color(col);
+		break;
+	case 13:
+		var col = ui.g.get_color();
+		var ui1 = ui.g;
+		var color = element.color;
+		var defaultColor = armory_ui_Canvas.getTheme(canvas.theme).BUTTON_COL;
+		ui1.set_color(color != null ? color : defaultColor);
+		ui.g.drawRect(ui._x,ui._y,ui._w,element.height * armory_ui_Canvas._ui.ops.scaleFactor | 0,element.strength);
+		ui.g.set_color(col);
+		break;
+	case 14:
+		var col = ui.g.get_color();
+		var ui1 = ui.g;
+		var color = element.color;
+		var defaultColor = armory_ui_Canvas.getTheme(canvas.theme).BUTTON_COL;
+		ui1.set_color(color != null ? color : defaultColor);
+		kha_graphics2_GraphicsExtension.fillCircle(ui.g,ui._x + (element.width * armory_ui_Canvas._ui.ops.scaleFactor | 0) / 2,ui._y + (element.height * armory_ui_Canvas._ui.ops.scaleFactor | 0) / 2,ui._w / 2);
+		ui.g.set_color(col);
+		break;
+	case 15:
+		var col = ui.g.get_color();
+		var ui1 = ui.g;
+		var color = element.color;
+		var defaultColor = armory_ui_Canvas.getTheme(canvas.theme).BUTTON_COL;
+		ui1.set_color(color != null ? color : defaultColor);
+		kha_graphics2_GraphicsExtension.drawCircle(ui.g,ui._x + (element.width * armory_ui_Canvas._ui.ops.scaleFactor | 0) / 2,ui._y + (element.height * armory_ui_Canvas._ui.ops.scaleFactor | 0) / 2,ui._w / 2,element.strength);
+		ui.g.set_color(col);
+		break;
+	case 16:
+		var col = ui.g.get_color();
+		var ui1 = ui.g;
+		var color = element.color;
+		var defaultColor = armory_ui_Canvas.getTheme(canvas.theme).BUTTON_COL;
+		ui1.set_color(color != null ? color : defaultColor);
+		ui.g.fillTriangle(ui._x + ui._w / 2,ui._y,ui._x,ui._y + (element.height * armory_ui_Canvas._ui.ops.scaleFactor | 0),ui._x + ui._w,ui._y + (element.height * armory_ui_Canvas._ui.ops.scaleFactor | 0));
+		ui.g.set_color(col);
+		break;
+	case 17:
+		var col = ui.g.get_color();
+		var ui1 = ui.g;
+		var color = element.color;
+		var defaultColor = armory_ui_Canvas.getTheme(canvas.theme).BUTTON_COL;
+		ui1.set_color(color != null ? color : defaultColor);
+		ui.g.drawLine(ui._x + ui._w / 2,ui._y,ui._x,ui._y + (element.height * armory_ui_Canvas._ui.ops.scaleFactor | 0),element.strength);
+		ui.g.drawLine(ui._x,ui._y + (element.height * armory_ui_Canvas._ui.ops.scaleFactor | 0),ui._x + ui._w,ui._y + (element.height * armory_ui_Canvas._ui.ops.scaleFactor | 0),element.strength);
+		ui.g.drawLine(ui._x + ui._w,ui._y + (element.height * armory_ui_Canvas._ui.ops.scaleFactor | 0),ui._x + ui._w / 2,ui._y,element.strength);
+		ui.g.set_color(col);
+		break;
+	case 18:
+		var col = ui.g.get_color();
+		var progress = element.progress_at;
+		var totalprogress = element.progress_total;
+		var ui1 = ui.g;
+		var color = element.color_progress;
+		var defaultColor = armory_ui_Canvas.getTheme(canvas.theme).TEXT_COL;
+		ui1.set_color(color != null ? color : defaultColor);
+		ui.g.fillRect(ui._x,ui._y,ui._w / totalprogress * Math.min(progress,totalprogress),element.height * armory_ui_Canvas._ui.ops.scaleFactor | 0);
+		var ui1 = ui.g;
+		var color = element.color;
+		var defaultColor = armory_ui_Canvas.getTheme(canvas.theme).BUTTON_COL;
+		ui1.set_color(color != null ? color : defaultColor);
+		ui.g.drawRect(ui._x,ui._y,ui._w,element.height * armory_ui_Canvas._ui.ops.scaleFactor | 0,element.strength);
+		ui.g.set_color(col);
+		break;
+	case 19:
+		var col = ui.g.get_color();
+		var progress = element.progress_at;
+		var totalprogress = element.progress_total;
+		var ui1 = ui.g;
+		var color = element.color_progress;
+		var defaultColor = armory_ui_Canvas.getTheme(canvas.theme).TEXT_COL;
+		ui1.set_color(color != null ? color : defaultColor);
+		kha_graphics2_GraphicsExtension.drawArc(ui.g,ui._x + (element.width * armory_ui_Canvas._ui.ops.scaleFactor | 0) / 2,ui._y + (element.height * armory_ui_Canvas._ui.ops.scaleFactor | 0) / 2,ui._w / 2,-Math.PI / 2,Math.PI * 2 / totalprogress * progress - Math.PI / 2,element.strength);
+		var ui1 = ui.g;
+		var color = element.color;
+		var defaultColor = armory_ui_Canvas.getTheme(canvas.theme).BUTTON_COL;
+		ui1.set_color(color != null ? color : defaultColor);
+		kha_graphics2_GraphicsExtension.fillCircle(ui.g,ui._x + (element.width * armory_ui_Canvas._ui.ops.scaleFactor | 0) / 2,ui._y + (element.height * armory_ui_Canvas._ui.ops.scaleFactor | 0) / 2,ui._w / 2 - 10);
+		ui.g.set_color(col);
+		break;
+	case 20:
+		var color = element.color_text;
+		var defaultColor = armory_ui_Canvas.getTheme(canvas.theme).TEXT_COL;
+		ui.t.TEXT_COL = color != null ? color : defaultColor;
+		var color = element.color_text;
+		var defaultColor = armory_ui_Canvas.getTheme(canvas.theme).TEXT_COL;
+		ui.t.LABEL_COL = color != null ? color : defaultColor;
+		var color = element.color;
+		var defaultColor = armory_ui_Canvas.getTheme(canvas.theme).BUTTON_COL;
+		ui.t.ACCENT_COL = color != null ? color : defaultColor;
+		var color = element.color_hover;
+		var defaultColor = armory_ui_Canvas.getTheme(canvas.theme).BUTTON_HOVER_COL;
+		ui.t.ACCENT_HOVER_COL = color != null ? color : defaultColor;
+		armory_ui_Canvas.h.nest(element.id).text = element.text;
+		zui_Ext.textArea(ui,armory_ui_Canvas.h.nest(element.id),element.alignment,element.editable);
+		if(armory_ui_Canvas.h.nest(element.id).changed) {
+			var e = element.event;
+			if(e != null && e != "") {
+				armory_ui_Canvas.events.push(e);
+			}
+		}
+		break;
+	}
+	if(element.children != null) {
+		var _g = 0;
+		var _g1 = element.children;
+		while(_g < _g1.length) {
+			var id = _g1[_g];
+			++_g;
+			armory_ui_Canvas.drawElement(ui,canvas,armory_ui_Canvas.elemById(canvas,id),(element.x * armory_ui_Canvas._ui.ops.scaleFactor | 0) + px,(element.y * armory_ui_Canvas._ui.ops.scaleFactor | 0) + py);
+		}
+	}
+	if(rotated) {
+		ui.g.popTransformation();
+	}
+};
+armory_ui_Canvas.getText = function(canvas,e) {
+	return e.text;
+};
+armory_ui_Canvas.getAsset = function(canvas,asset) {
+	var _g = 0;
+	var _g1 = canvas.assets;
+	while(_g < _g1.length) {
+		var a = _g1[_g];
+		++_g;
+		if(a.name == asset) {
+			return armory_ui_Canvas.assetMap.h[a.id];
+		}
+	}
+	return null;
+};
+armory_ui_Canvas.getElementId = function(canvas) {
+	if(armory_ui_Canvas.elemId == -1) {
+		var _g = 0;
+		var _g1 = canvas.elements;
+		while(_g < _g1.length) {
+			var e = _g1[_g];
+			++_g;
+			if(armory_ui_Canvas.elemId < e.id) {
+				armory_ui_Canvas.elemId = e.id;
+			}
+		}
+	}
+	return ++armory_ui_Canvas.elemId;
+};
+armory_ui_Canvas.getAssetId = function(canvas) {
+	if(armory_ui_Canvas.assetId == -1) {
+		var _g = 0;
+		var _g1 = canvas.assets;
+		while(_g < _g1.length) {
+			var a = _g1[_g];
+			++_g;
+			if(armory_ui_Canvas.assetId < a.id) {
+				armory_ui_Canvas.assetId = a.id;
+			}
+		}
+	}
+	return ++armory_ui_Canvas.assetId;
+};
+armory_ui_Canvas.elemById = function(canvas,id) {
+	var _g = 0;
+	var _g1 = canvas.elements;
+	while(_g < _g1.length) {
+		var e = _g1[_g];
+		++_g;
+		if(e.id == id) {
+			return e;
+		}
+	}
+	return null;
+};
+armory_ui_Canvas.scaled = function(f) {
+	return f * armory_ui_Canvas._ui.ops.scaleFactor | 0;
+};
+armory_ui_Canvas.getColor = function(color,defaultColor) {
+	if(color != null) {
+		return color;
+	} else {
+		return defaultColor;
+	}
+};
+armory_ui_Canvas.getTheme = function(theme) {
+	var _g = 0;
+	var _g1 = armory_ui_Canvas.themes;
+	while(_g < _g1.length) {
+		var t = _g1[_g];
+		++_g;
+		if(t.NAME == theme) {
+			return t;
+		}
+	}
+	return null;
+};
+armory_ui_Canvas.getAnchorOffset = function(canvas,element) {
+	var boxWidth;
+	var boxHeight;
+	var offsetX = 0.0;
+	var offsetY = 0.0;
+	if(element.parent == null) {
+		boxWidth = canvas.width;
+		boxHeight = canvas.height;
+	} else {
+		var parent = armory_ui_Canvas.elemById(canvas,element.parent);
+		boxWidth = parent.width * armory_ui_Canvas._ui.ops.scaleFactor | 0;
+		boxHeight = parent.height * armory_ui_Canvas._ui.ops.scaleFactor | 0;
+	}
+	switch(element.anchor) {
+	case 1:
+		offsetX += boxWidth / 2 - (element.width * armory_ui_Canvas._ui.ops.scaleFactor | 0) / 2;
+		break;
+	case 2:
+		offsetX += boxWidth - (element.width * armory_ui_Canvas._ui.ops.scaleFactor | 0);
+		break;
+	case 3:
+		offsetY += boxHeight / 2 - (element.height * armory_ui_Canvas._ui.ops.scaleFactor | 0) / 2;
+		break;
+	case 4:
+		offsetX += boxWidth / 2 - (element.width * armory_ui_Canvas._ui.ops.scaleFactor | 0) / 2;
+		offsetY += boxHeight / 2 - (element.height * armory_ui_Canvas._ui.ops.scaleFactor | 0) / 2;
+		break;
+	case 5:
+		offsetX += boxWidth - (element.width * armory_ui_Canvas._ui.ops.scaleFactor | 0);
+		offsetY += boxHeight / 2 - (element.height * armory_ui_Canvas._ui.ops.scaleFactor | 0) / 2;
+		break;
+	case 6:
+		offsetY += boxHeight - (element.height * armory_ui_Canvas._ui.ops.scaleFactor | 0);
+		break;
+	case 7:
+		offsetX += boxWidth / 2 - (element.width * armory_ui_Canvas._ui.ops.scaleFactor | 0) / 2;
+		offsetY += boxHeight - (element.height * armory_ui_Canvas._ui.ops.scaleFactor | 0);
+		break;
+	case 8:
+		offsetX += boxWidth - (element.width * armory_ui_Canvas._ui.ops.scaleFactor | 0);
+		offsetY += boxHeight - (element.height * armory_ui_Canvas._ui.ops.scaleFactor | 0);
+		break;
+	}
+	return [offsetX,offsetY];
+};
+var armory_ui_Ext = function() { };
+$hxClasses["armory.ui.Ext"] = armory_ui_Ext;
+armory_ui_Ext.__name__ = true;
+armory_ui_Ext.keyInput = function(ui,handle,label,align) {
+	if(align == null) {
+		align = 0;
+	}
+	if(label == null) {
+		label = "";
+	}
+	if(!ui.isVisible(ui.t.ELEMENT_H * ui.ops.scaleFactor)) {
+		ui.endElement();
+		return handle.value | 0;
+	}
+	var hover = ui.getHover();
+	if(hover && zui_Zui.onTextHover != null) {
+		zui_Zui.onTextHover();
+	}
+	ui.g.set_color(hover ? ui.t.ACCENT_HOVER_COL : ui.t.ACCENT_COL);
+	var g = ui.g;
+	var fill = ui.t.FILL_ACCENT_BG;
+	var x = ui._x + ui.buttonOffsetY;
+	var y = ui._y + ui.buttonOffsetY;
+	var w = ui._w - ui.buttonOffsetY * 2;
+	var h = ui.t.BUTTON_H * ui.ops.scaleFactor;
+	var strength = 0.0;
+	if(strength == 0.0) {
+		strength = 1;
+	}
+	if(!ui.enabled) {
+		ui.fadeColor();
+	}
+	if(fill) {
+		g.fillRect(x,y - 1,w,h + 1);
+	} else {
+		g.drawRect(x,y,w,h,strength);
+	}
+	var startEdit = ui.getReleased() || ui.tabPressed;
+	if(ui.textSelectedHandle != handle && startEdit) {
+		ui.startTextEdit(handle);
+	}
+	if(ui.textSelectedHandle == handle) {
+		armory_ui_Ext.listenToKey(ui,handle);
+	} else {
+		handle.changed = false;
+	}
+	if(label != "") {
+		ui.g.set_color(ui.t.LABEL_COL);
+		var labelAlign = align == 2 ? 0 : 2;
+		var xOffset = labelAlign == 0 ? 7 : 0;
+		ui.drawString(ui.g,label,xOffset,0,labelAlign);
+	}
+	handle.text = armory_ui_Ext.keycodeToString(handle.value | 0);
+	ui.g.set_color(ui.t.TEXT_COL);
+	if(ui.textSelectedHandle != handle) {
+		ui.drawString(ui.g,handle.text,null,0,align);
+	} else {
+		ui.drawString(ui.g,ui.textSelected,null,0,align);
+	}
+	ui.endElement();
+	return handle.value | 0;
+};
+armory_ui_Ext.listenToKey = function(ui,handle) {
+	if(ui.isKeyDown) {
+		handle.value = ui.key;
+		handle.changed = ui.changed = true;
+		ui.textSelectedHandle = null;
+		ui.isTyping = false;
+		if(kha_input_Keyboard.get() != null) {
+			kha_input_Keyboard.get().hide();
+		}
+	} else {
+		ui.textSelected = "Press a key...";
+	}
+};
+armory_ui_Ext.list = function(ui,handle,ar,opts) {
+	var selected = 0;
+	if(opts == null) {
+		opts = { };
+	}
+	var addCb = opts.addCb != null ? opts.addCb : function(name) {
+		ar.push(name);
+	};
+	var removeCb = opts.removeCb != null ? opts.removeCb : function(i) {
+		ar.splice(i,1);
+	};
+	var getNameCb = opts.getNameCb != null ? opts.getNameCb : function(i) {
+		return ar[i];
+	};
+	var setNameCb = opts.setNameCb != null ? opts.setNameCb : function(i,name) {
+		ar[i] = name;
+	};
+	var getLabelCb = opts.getLabelCb != null ? opts.getLabelCb : function(i) {
+		return "";
+	};
+	var itemDrawCb = opts.itemDrawCb;
+	var showRadio = opts.showRadio != null && opts.showRadio;
+	var editable = opts.editable != null ? opts.editable : true;
+	var showAdd = opts.showAdd != null ? opts.showAdd : true;
+	var addLabel = opts.addLabel != null ? opts.addLabel : "Add";
+	var i = 0;
+	while(i < ar.length) {
+		if(showRadio) {
+			ui.row([0.12,0.68,0.2]);
+			if(ui.radio(handle.nest(0),i,"")) {
+				selected = i;
+			}
+		} else {
+			ui.row([0.8,0.2]);
+		}
+		var itemHandle = handle.nest(i);
+		itemHandle.text = getNameCb(i);
+		if(editable) {
+			setNameCb(i,ui.textInput(itemHandle,getLabelCb(i)));
+		} else {
+			ui.text(getNameCb(i));
+		}
+		if(ui.button("X")) {
+			removeCb(i);
+		} else {
+			++i;
+		}
+		if(itemDrawCb != null) {
+			itemDrawCb(itemHandle.nest(i),i - 1);
+		}
+	}
+	if(showAdd && ui.button(addLabel)) {
+		addCb("untitled");
+	}
+	return selected;
+};
+armory_ui_Ext.panelList = function(ui,handle,ar,addCb,removeCb,getNameCb,setNameCb,itemDrawCb,editable,showAdd,addLabel) {
+	if(addLabel == null) {
+		addLabel = "Add";
+	}
+	if(showAdd == null) {
+		showAdd = true;
+	}
+	if(editable == null) {
+		editable = true;
+	}
+	if(addCb == null) {
+		addCb = function(name) {
+			ar.push(name);
+		};
+	}
+	if(removeCb == null) {
+		removeCb = function(i) {
+			ar.splice(i,1);
+		};
+	}
+	if(getNameCb == null) {
+		getNameCb = function(i) {
+			return ar[i];
+		};
+	}
+	if(setNameCb == null) {
+		setNameCb = function(i,name) {
+			ar[i] = name;
+		};
+	}
+	var i = 0;
+	while(i < ar.length) {
+		ui.row([0.12,0.68,0.2]);
+		var expanded = ui.panel(handle.nest(i),"");
+		var itemHandle = handle.nest(i);
+		if(editable) {
+			setNameCb(i,ui.textInput(itemHandle,getNameCb(i)));
+		} else {
+			ui.text(getNameCb(i));
+		}
+		if(ui.button("X")) {
+			removeCb(i);
+		} else {
+			++i;
+		}
+		if(itemDrawCb != null && expanded) {
+			itemDrawCb(itemHandle.nest(i),i - 1);
+		}
+	}
+	if(showAdd && ui.button(addLabel)) {
+		addCb("untitled");
+	}
+};
+armory_ui_Ext.colorField = function(ui,handle,alpha) {
+	if(alpha == null) {
+		alpha = false;
+	}
+	ui.g.set_color(handle.color);
+	var g = ui.g;
+	var x = ui._x + 2;
+	var y = ui._y + ui.buttonOffsetY;
+	var w = ui._w - 4;
+	var h = ui.t.BUTTON_H * ui.ops.scaleFactor;
+	var strength = 0.0;
+	if(strength == 0.0) {
+		strength = 1;
+	}
+	if(!ui.enabled) {
+		ui.fadeColor();
+	}
+	g.fillRect(x,y - 1,w,h + 1);
+	ui.g.set_color(ui.getHover() ? ui.t.ACCENT_HOVER_COL : ui.t.ACCENT_COL);
+	var g = ui.g;
+	var x = ui._x + 2;
+	var y = ui._y + ui.buttonOffsetY;
+	var w = ui._w - 4;
+	var h = ui.t.BUTTON_H * ui.ops.scaleFactor;
+	var strength = 1.0;
+	if(strength == null) {
+		strength = 0.0;
+	}
+	if(strength == 0.0) {
+		strength = 1;
+	}
+	if(!ui.enabled) {
+		ui.fadeColor();
+	}
+	g.drawRect(x,y,w,h,strength);
+	if(ui.getStarted()) {
+		armory_ui_Popup.showCustom(new zui_Zui(ui.ops),function(ui) {
+			zui_Ext.colorWheel(ui,handle,alpha);
+		},ui.inputX | 0,ui.inputY | 0,200,500);
+	}
+	ui.endElement();
+	return handle.color;
+};
+armory_ui_Ext.colorPicker = function(ui,handle,alpha) {
+	if(alpha == null) {
+		alpha = false;
+	}
+	var r = ui.slider(handle.nest(0,{ value : ((handle.color & 16711680) >>> 16) * 0.00392156862745098}),"R",0,1,true);
+	var g = ui.slider(handle.nest(1,{ value : ((handle.color & 65280) >>> 8) * 0.00392156862745098}),"G",0,1,true);
+	var b = ui.slider(handle.nest(2,{ value : (handle.color & 255) * 0.00392156862745098}),"B",0,1,true);
+	var a = (handle.color >>> 24) * 0.00392156862745098;
+	if(alpha) {
+		a = ui.slider(handle.nest(3,{ value : a}),"A",0,1,true);
+	}
+	var col = kha_Color.fromFloats(r,g,b,a);
+	ui.text("",2,col);
+	return col;
+};
+armory_ui_Ext.keycodeToString = function(keycode) {
+	switch(keycode) {
+	case -1:
+		return "None";
+	case 0:
+		return "Unknown";
+	case 1:
+		return "Back";
+	case 3:
+		return "Cancel";
+	case 6:
+		return "Help";
+	case 8:
+		return "Backspace";
+	case 9:
+		return "Tab";
+	case 12:
+		return "Clear";
+	case 13:
+		return "Return";
+	case 16:
+		return "Shift";
+	case 17:
+		return "Ctrl";
+	case 18:
+		return "Alt";
+	case 19:
+		return "Pause";
+	case 20:
+		return "CapsLock";
+	case 21:
+		return "Kana";
+	case 22:
+		return "Eisu";
+	case 23:
+		return "Junja";
+	case 24:
+		return "Final";
+	case 25:
+		return "Hanja";
+	case 27:
+		return "Esc";
+	case 28:
+		return "Convert";
+	case 29:
+		return "NonConvert";
+	case 30:
+		return "Accept";
+	case 31:
+		return "ModeChange";
+	case 32:
+		return "Space";
+	case 33:
+		return "PageUp";
+	case 34:
+		return "PageDown";
+	case 35:
+		return "End";
+	case 36:
+		return "Home";
+	case 37:
+		return "Left";
+	case 38:
+		return "Up";
+	case 39:
+		return "Right";
+	case 40:
+		return "Down";
+	case 41:
+		return "Select";
+	case 42:
+		return "Print";
+	case 43:
+		return "Execute";
+	case 44:
+		return "PrintScreen";
+	case 45:
+		return "Insert";
+	case 46:
+		return "Delete";
+	case 58:
+		return "Colon";
+	case 59:
+		return "Semicolon";
+	case 60:
+		return "LessThan";
+	case 61:
+		return "Equals";
+	case 62:
+		return "GreaterThan";
+	case 63:
+		return "QuestionMark";
+	case 64:
+		return "At";
+	case 91:
+		return "Win";
+	case 93:
+		return "ContextMenu";
+	case 95:
+		return "Sleep";
+	case 96:
+		return "Numpad0";
+	case 97:
+		return "Numpad1";
+	case 98:
+		return "Numpad2";
+	case 99:
+		return "Numpad3";
+	case 100:
+		return "Numpad4";
+	case 101:
+		return "Numpad5";
+	case 102:
+		return "Numpad6";
+	case 103:
+		return "Numpad7";
+	case 104:
+		return "Numpad8";
+	case 105:
+		return "Numpad9";
+	case 106:
+		return "Multiply";
+	case 107:
+		return "Add";
+	case 108:
+		return "Separator";
+	case 109:
+		return "Subtract";
+	case 110:
+		return "Decimal";
+	case 111:
+		return "Divide";
+	case 112:
+		return "F1";
+	case 113:
+		return "F2";
+	case 114:
+		return "F3";
+	case 115:
+		return "F4";
+	case 116:
+		return "F5";
+	case 117:
+		return "F6";
+	case 118:
+		return "F7";
+	case 119:
+		return "F8";
+	case 120:
+		return "F9";
+	case 121:
+		return "F10";
+	case 122:
+		return "F11";
+	case 123:
+		return "F12";
+	case 124:
+		return "F13";
+	case 125:
+		return "F14";
+	case 126:
+		return "F15";
+	case 127:
+		return "F16";
+	case 128:
+		return "F17";
+	case 129:
+		return "F18";
+	case 130:
+		return "F19";
+	case 131:
+		return "F20";
+	case 132:
+		return "F21";
+	case 133:
+		return "F22";
+	case 134:
+		return "F23";
+	case 135:
+		return "F24";
+	case 144:
+		return "NumLock";
+	case 145:
+		return "ScrollLock";
+	case 146:
+		return "WinOemFjJisho";
+	case 147:
+		return "WinOemFjMasshou";
+	case 148:
+		return "WinOemFjTouroku";
+	case 149:
+		return "WinOemFjLoya";
+	case 150:
+		return "WinOemFjRoya";
+	case 160:
+		return "Circumflex";
+	case 161:
+		return "Exclamation";
+	case 162:
+		return "DoubleQuote";
+	case 163:
+		return "Hash";
+	case 164:
+		return "Dollar";
+	case 165:
+		return "Percent";
+	case 166:
+		return "Ampersand";
+	case 167:
+		return "Underscore";
+	case 168:
+		return "OpenParen";
+	case 169:
+		return "CloseParen";
+	case 170:
+		return "Asterisk";
+	case 171:
+		return "Plus";
+	case 172:
+		return "Pipe";
+	case 173:
+		return "HyphenMinus";
+	case 174:
+		return "OpenCurlyBracket";
+	case 175:
+		return "CloseCurlyBracket";
+	case 176:
+		return "Tilde";
+	case 181:
+		return "VolumeMute";
+	case 182:
+		return "VolumeDown";
+	case 183:
+		return "VolumeUp";
+	case 188:
+		return "Comma";
+	case 190:
+		return "Period";
+	case 191:
+		return "Slash";
+	case 192:
+		return "BackQuote";
+	case 219:
+		return "OpenBracket";
+	case 220:
+		return "BackSlash";
+	case 221:
+		return "CloseBracket";
+	case 222:
+		return "Quote";
+	case 224:
+		return "Meta";
+	case 225:
+		return "AltGr";
+	case 227:
+		return "WinIcoHelp";
+	case 228:
+		return "WinIco00";
+	case 230:
+		return "WinIcoClear";
+	case 233:
+		return "WinOemReset";
+	case 234:
+		return "WinOemJump";
+	case 235:
+		return "WinOemPA1";
+	case 236:
+		return "WinOemPA2";
+	case 237:
+		return "WinOemPA3";
+	case 238:
+		return "WinOemWSCTRL";
+	case 239:
+		return "WinOemCUSEL";
+	case 240:
+		return "WinOemATTN";
+	case 241:
+		return "WinOemFinish";
+	case 242:
+		return "WinOemCopy";
+	case 243:
+		return "WinOemAuto";
+	case 244:
+		return "WinOemENLW";
+	case 245:
+		return "WinOemBackTab";
+	case 246:
+		return "ATTN";
+	case 247:
+		return "CRSEL";
+	case 248:
+		return "EXSEL";
+	case 249:
+		return "EREOF";
+	case 250:
+		return "Play";
+	case 251:
+		return "Zoom";
+	case 253:
+		return "PA1";
+	case 254:
+		return "WinOemClear";
+	}
+	return String.fromCodePoint(keycode);
+};
+var armory_ui_Popup = function() { };
+$hxClasses["armory.ui.Popup"] = armory_ui_Popup;
+armory_ui_Popup.__name__ = true;
+armory_ui_Popup.render = function(g) {
+	if(armory_ui_Popup.boxCommands == null) {
+		armory_ui_Popup.ui.begin(g);
+		if(armory_ui_Popup.ui.window(armory_ui_Popup.hwnd,armory_ui_Popup.modalX,armory_ui_Popup.modalY,armory_ui_Popup.modalW,armory_ui_Popup.modalH)) {
+			armory_ui_Popup.drawTitle(g);
+			var _g = 0;
+			var _g1 = armory_ui_Popup.boxText.split("\n");
+			while(_g < _g1.length) {
+				var line = _g1[_g];
+				++_g;
+				armory_ui_Popup.ui.text(line);
+			}
+			armory_ui_Popup.ui._y = armory_ui_Popup.ui._h - armory_ui_Popup.ui.t.BUTTON_H - 10;
+			armory_ui_Popup.ui.row([0.33333333333333331,0.33333333333333331,0.33333333333333331]);
+			armory_ui_Popup.ui.endElement();
+			if(armory_ui_Popup.ui.button("OK")) {
+				armory_ui_Popup.show = false;
+			}
+		}
+		armory_ui_Popup.ui.end();
+	} else {
+		armory_ui_Popup.ui.begin(g);
+		if(armory_ui_Popup.ui.window(armory_ui_Popup.hwnd,armory_ui_Popup.modalX,armory_ui_Popup.modalY,armory_ui_Popup.modalW,armory_ui_Popup.modalH)) {
+			armory_ui_Popup.drawTitle(g);
+			armory_ui_Popup.ui._y += 10;
+			armory_ui_Popup.boxCommands(armory_ui_Popup.ui);
+		}
+		armory_ui_Popup.ui.end();
+	}
+};
+armory_ui_Popup.drawTitle = function(g) {
+	if(armory_ui_Popup.boxTitle != "") {
+		g.set_color(armory_ui_Popup.ui.t.SEPARATOR_COL);
+		var _this = armory_ui_Popup.ui;
+		var x = armory_ui_Popup.ui._x;
+		var y = armory_ui_Popup.ui._y;
+		var w = armory_ui_Popup.ui._w;
+		var h = armory_ui_Popup.ui.t.BUTTON_H;
+		var strength = 0.0;
+		if(strength == 0.0) {
+			strength = 1;
+		}
+		if(!_this.enabled) {
+			_this.fadeColor();
+		}
+		g.fillRect(x,y - 1,w,h + 1);
+		g.set_color(armory_ui_Popup.ui.t.TEXT_COL);
+		armory_ui_Popup.ui.text(armory_ui_Popup.boxTitle);
+	}
+};
+armory_ui_Popup.update = function() {
+	var inUse = armory_ui_Popup.ui.comboSelectedHandle != null;
+	if(armory_ui_Popup.ui.inputStarted && !inUse) {
+		if(armory_ui_Popup.ui.inputX < armory_ui_Popup.modalX || armory_ui_Popup.ui.inputX > armory_ui_Popup.modalX + armory_ui_Popup.modalW || armory_ui_Popup.ui.inputY < armory_ui_Popup.modalY || armory_ui_Popup.ui.inputY > armory_ui_Popup.modalY + armory_ui_Popup.modalH) {
+			armory_ui_Popup.show = false;
+		}
+	}
+};
+armory_ui_Popup.showMessage = function(ui,title,text) {
+	armory_ui_Popup.ui = ui;
+	armory_ui_Popup.init();
+	armory_ui_Popup.boxTitle = title;
+	armory_ui_Popup.boxText = text;
+	armory_ui_Popup.boxCommands = null;
+};
+armory_ui_Popup.showCustom = function(ui,commands,mx,my,mw,mh) {
+	if(mh == null) {
+		mh = 160;
+	}
+	if(mw == null) {
+		mw = 400;
+	}
+	if(my == null) {
+		my = -1;
+	}
+	if(mx == null) {
+		mx = -1;
+	}
+	armory_ui_Popup.ui = ui;
+	armory_ui_Popup.init(mx,my,mw,mh);
+	armory_ui_Popup.boxTitle = "";
+	armory_ui_Popup.boxText = "";
+	armory_ui_Popup.boxCommands = commands;
+};
+armory_ui_Popup.init = function(mx,my,mw,mh) {
+	if(mh == null) {
+		mh = 160;
+	}
+	if(mw == null) {
+		mw = 400;
+	}
+	if(my == null) {
+		my = -1;
+	}
+	if(mx == null) {
+		mx = -1;
+	}
+	var appW = kha_System.windowWidth();
+	var appH = kha_System.windowHeight();
+	armory_ui_Popup.modalX = mx;
+	armory_ui_Popup.modalY = my;
+	armory_ui_Popup.modalW = mw * armory_ui_Popup.ui.ops.scaleFactor | 0;
+	armory_ui_Popup.modalH = mh * armory_ui_Popup.ui.ops.scaleFactor | 0;
+	if(mx == -1) {
+		armory_ui_Popup.modalX = appW / 2 - armory_ui_Popup.modalW / 2 | 0;
+	}
+	if(my == -1) {
+		armory_ui_Popup.modalY = appH / 2 - armory_ui_Popup.modalH / 2 | 0;
+	}
+	armory_ui_Popup.modalX = Math.max(0,Math.min(armory_ui_Popup.modalX,appW - armory_ui_Popup.modalW)) | 0;
+	armory_ui_Popup.modalY = Math.max(0,Math.min(armory_ui_Popup.modalY,appH - armory_ui_Popup.modalH)) | 0;
+	armory_ui_Popup.hwnd.dragX = 0;
+	armory_ui_Popup.hwnd.dragY = 0;
+	armory_ui_Popup.hwnd.scrollOffset = 0.0;
+	armory_ui_Popup.show = true;
+};
+var armory_ui_Themes = function() { };
+$hxClasses["armory.ui.Themes"] = armory_ui_Themes;
+armory_ui_Themes.__name__ = true;
 var haxe_IMap = function() { };
 $hxClasses["haxe.IMap"] = haxe_IMap;
 haxe_IMap.__name__ = true;
@@ -28813,450 +29848,6 @@ kha_simd_Float32x4.prototype = {
 	,_3: null
 	,__class__: kha_simd_Float32x4
 };
-var zui_Canvas = function() { };
-$hxClasses["zui.Canvas"] = zui_Canvas;
-zui_Canvas.__name__ = true;
-zui_Canvas.draw = function(ui,canvas,g) {
-	zui_Canvas.screenW = kha_System.windowWidth();
-	zui_Canvas.screenH = kha_System.windowHeight();
-	zui_Canvas.events.length = 0;
-	zui_Canvas._ui = ui;
-	g.end();
-	ui.begin(g);
-	g.begin(false);
-	ui.g = g;
-	var _g = 0;
-	var _g1 = canvas.elements;
-	while(_g < _g1.length) {
-		var elem = _g1[_g];
-		++_g;
-		if(elem.parent == null) {
-			zui_Canvas.drawElement(ui,canvas,elem);
-		}
-	}
-	g.end();
-	ui.end();
-	g.begin(false);
-	return zui_Canvas.events;
-};
-zui_Canvas.drawElement = function(ui,canvas,element,px,py) {
-	if(py == null) {
-		py = 0.0;
-	}
-	if(px == null) {
-		px = 0.0;
-	}
-	if(element == null || element.visible == false) {
-		return;
-	}
-	var anchorOffset = zui_Canvas.getAnchorOffset(canvas,element);
-	px += anchorOffset[0];
-	py += anchorOffset[1];
-	ui._x = canvas.x + (element.x * zui_Canvas._ui.ops.scaleFactor | 0) + px;
-	ui._y = canvas.y + (element.y * zui_Canvas._ui.ops.scaleFactor | 0) + py;
-	ui._w = element.width * zui_Canvas._ui.ops.scaleFactor | 0;
-	var rotated = element.rotation != null && element.rotation != 0;
-	if(rotated) {
-		ui.g.pushRotation(element.rotation,ui._x + (element.width * zui_Canvas._ui.ops.scaleFactor | 0) / 2,ui._y + (element.height * zui_Canvas._ui.ops.scaleFactor | 0) / 2);
-	}
-	switch(element.type) {
-	case 0:
-		var font = ui.ops.font;
-		var size = ui.fontSize;
-		var fontAsset = element.asset != null && StringTools.endsWith(element.asset,".ttf");
-		if(fontAsset) {
-			ui.ops.font = zui_Canvas.getAsset(canvas,element.asset);
-		}
-		ui.fontSize = element.height * zui_Canvas._ui.ops.scaleFactor | 0;
-		var color = element.color_text;
-		var defaultColor = zui_Canvas.getTheme(canvas.theme).TEXT_COL;
-		ui.t.TEXT_COL = color != null ? color : defaultColor;
-		ui.text(element.text,element.alignment);
-		ui.ops.font = font;
-		ui.fontSize = size;
-		break;
-	case 1:
-		var image = zui_Canvas.getAsset(canvas,element.asset);
-		var fontAsset = element.asset != null && StringTools.endsWith(element.asset,".ttf");
-		if(image != null && !fontAsset) {
-			ui.imageScrollAlign = false;
-			var tint = element.color != null ? element.color : -1;
-			if(ui.image(image,tint,element.height * zui_Canvas._ui.ops.scaleFactor | 0) == 3) {
-				var e = element.event;
-				if(e != null && e != "") {
-					zui_Canvas.events.push(e);
-				}
-			}
-			ui.imageScrollAlign = true;
-		}
-		break;
-	case 2:
-		var eh = ui.t.ELEMENT_H;
-		var bh = ui.t.BUTTON_H;
-		ui.t.ELEMENT_H = element.height;
-		ui.t.BUTTON_H = element.height;
-		var color = element.color;
-		var defaultColor = zui_Canvas.getTheme(canvas.theme).BUTTON_COL;
-		ui.t.BUTTON_COL = color != null ? color : defaultColor;
-		var color = element.color_text;
-		var defaultColor = zui_Canvas.getTheme(canvas.theme).BUTTON_TEXT_COL;
-		ui.t.BUTTON_TEXT_COL = color != null ? color : defaultColor;
-		var color = element.color_hover;
-		var defaultColor = zui_Canvas.getTheme(canvas.theme).BUTTON_HOVER_COL;
-		ui.t.BUTTON_HOVER_COL = color != null ? color : defaultColor;
-		var color = element.color_press;
-		var defaultColor = zui_Canvas.getTheme(canvas.theme).BUTTON_PRESSED_COL;
-		ui.t.BUTTON_PRESSED_COL = color != null ? color : defaultColor;
-		if(ui.button(element.text,element.alignment)) {
-			var e = element.event;
-			if(e != null && e != "") {
-				zui_Canvas.events.push(e);
-			}
-		}
-		ui.t.ELEMENT_H = eh;
-		ui.t.BUTTON_H = bh;
-		break;
-	case 3:
-		break;
-	case 6:
-		var color = element.color_text;
-		var defaultColor = zui_Canvas.getTheme(canvas.theme).TEXT_COL;
-		ui.t.TEXT_COL = color != null ? color : defaultColor;
-		var color = element.color;
-		var defaultColor = zui_Canvas.getTheme(canvas.theme).BUTTON_COL;
-		ui.t.ACCENT_COL = color != null ? color : defaultColor;
-		var color = element.color_hover;
-		var defaultColor = zui_Canvas.getTheme(canvas.theme).BUTTON_HOVER_COL;
-		ui.t.ACCENT_HOVER_COL = color != null ? color : defaultColor;
-		ui.check(zui_Canvas.h.nest(element.id),element.text);
-		break;
-	case 7:
-		var color = element.color_text;
-		var defaultColor = zui_Canvas.getTheme(canvas.theme).TEXT_COL;
-		ui.t.TEXT_COL = color != null ? color : defaultColor;
-		var color = element.color;
-		var defaultColor = zui_Canvas.getTheme(canvas.theme).BUTTON_COL;
-		ui.t.ACCENT_COL = color != null ? color : defaultColor;
-		var color = element.color_hover;
-		var defaultColor = zui_Canvas.getTheme(canvas.theme).BUTTON_HOVER_COL;
-		ui.t.ACCENT_HOVER_COL = color != null ? color : defaultColor;
-		zui_Ext.inlineRadio(ui,zui_Canvas.h.nest(element.id),element.text.split(";"));
-		break;
-	case 8:
-		var color = element.color_text;
-		var defaultColor = zui_Canvas.getTheme(canvas.theme).TEXT_COL;
-		ui.t.TEXT_COL = color != null ? color : defaultColor;
-		var color = element.color_text;
-		var defaultColor = zui_Canvas.getTheme(canvas.theme).TEXT_COL;
-		ui.t.LABEL_COL = color != null ? color : defaultColor;
-		var color = element.color;
-		var defaultColor = zui_Canvas.getTheme(canvas.theme).BUTTON_COL;
-		ui.t.ACCENT_COL = color != null ? color : defaultColor;
-		var color = element.color;
-		var defaultColor = zui_Canvas.getTheme(canvas.theme).BUTTON_COL;
-		ui.t.SEPARATOR_COL = color != null ? color : defaultColor;
-		var color = element.color_hover;
-		var defaultColor = zui_Canvas.getTheme(canvas.theme).BUTTON_HOVER_COL;
-		ui.t.ACCENT_HOVER_COL = color != null ? color : defaultColor;
-		ui.combo(zui_Canvas.h.nest(element.id),element.text.split(";"));
-		break;
-	case 9:
-		var color = element.color_text;
-		var defaultColor = zui_Canvas.getTheme(canvas.theme).TEXT_COL;
-		ui.t.TEXT_COL = color != null ? color : defaultColor;
-		var color = element.color_text;
-		var defaultColor = zui_Canvas.getTheme(canvas.theme).TEXT_COL;
-		ui.t.LABEL_COL = color != null ? color : defaultColor;
-		var color = element.color;
-		var defaultColor = zui_Canvas.getTheme(canvas.theme).BUTTON_COL;
-		ui.t.ACCENT_COL = color != null ? color : defaultColor;
-		var color = element.color_hover;
-		var defaultColor = zui_Canvas.getTheme(canvas.theme).BUTTON_HOVER_COL;
-		ui.t.ACCENT_HOVER_COL = color != null ? color : defaultColor;
-		ui.slider(zui_Canvas.h.nest(element.id),element.text,0.0,1.0,true,100,true,element.alignment);
-		break;
-	case 10:
-		var color = element.color_text;
-		var defaultColor = zui_Canvas.getTheme(canvas.theme).TEXT_COL;
-		ui.t.TEXT_COL = color != null ? color : defaultColor;
-		var color = element.color_text;
-		var defaultColor = zui_Canvas.getTheme(canvas.theme).TEXT_COL;
-		ui.t.LABEL_COL = color != null ? color : defaultColor;
-		var color = element.color;
-		var defaultColor = zui_Canvas.getTheme(canvas.theme).BUTTON_COL;
-		ui.t.ACCENT_COL = color != null ? color : defaultColor;
-		var color = element.color_hover;
-		var defaultColor = zui_Canvas.getTheme(canvas.theme).BUTTON_HOVER_COL;
-		ui.t.ACCENT_HOVER_COL = color != null ? color : defaultColor;
-		ui.textInput(zui_Canvas.h.nest(element.id),element.text,element.alignment);
-		if(zui_Canvas.h.nest(element.id).changed) {
-			var e = element.event;
-			if(e != null && e != "") {
-				zui_Canvas.events.push(e);
-			}
-		}
-		break;
-	case 11:
-		var color = element.color_text;
-		var defaultColor = zui_Canvas.getTheme(canvas.theme).TEXT_COL;
-		ui.t.TEXT_COL = color != null ? color : defaultColor;
-		var color = element.color_text;
-		var defaultColor = zui_Canvas.getTheme(canvas.theme).TEXT_COL;
-		ui.t.LABEL_COL = color != null ? color : defaultColor;
-		var color = element.color;
-		var defaultColor = zui_Canvas.getTheme(canvas.theme).BUTTON_COL;
-		ui.t.ACCENT_COL = color != null ? color : defaultColor;
-		var color = element.color_hover;
-		var defaultColor = zui_Canvas.getTheme(canvas.theme).BUTTON_HOVER_COL;
-		ui.t.ACCENT_HOVER_COL = color != null ? color : defaultColor;
-		zui_Ext.keyInput(ui,zui_Canvas.h.nest(element.id),element.text);
-		break;
-	case 12:
-		var col = ui.g.get_color();
-		var ui1 = ui.g;
-		var color = element.color;
-		var defaultColor = zui_Canvas.getTheme(canvas.theme).BUTTON_COL;
-		ui1.set_color(color != null ? color : defaultColor);
-		ui.g.fillRect(ui._x,ui._y,ui._w,element.height * zui_Canvas._ui.ops.scaleFactor | 0);
-		ui.g.set_color(col);
-		break;
-	case 13:
-		var col = ui.g.get_color();
-		var ui1 = ui.g;
-		var color = element.color;
-		var defaultColor = zui_Canvas.getTheme(canvas.theme).BUTTON_COL;
-		ui1.set_color(color != null ? color : defaultColor);
-		ui.g.drawRect(ui._x,ui._y,ui._w,element.height * zui_Canvas._ui.ops.scaleFactor | 0,element.strength);
-		ui.g.set_color(col);
-		break;
-	case 14:
-		var col = ui.g.get_color();
-		var ui1 = ui.g;
-		var color = element.color;
-		var defaultColor = zui_Canvas.getTheme(canvas.theme).BUTTON_COL;
-		ui1.set_color(color != null ? color : defaultColor);
-		kha_graphics2_GraphicsExtension.fillCircle(ui.g,ui._x + (element.width * zui_Canvas._ui.ops.scaleFactor | 0) / 2,ui._y + (element.height * zui_Canvas._ui.ops.scaleFactor | 0) / 2,ui._w / 2);
-		ui.g.set_color(col);
-		break;
-	case 15:
-		var col = ui.g.get_color();
-		var ui1 = ui.g;
-		var color = element.color;
-		var defaultColor = zui_Canvas.getTheme(canvas.theme).BUTTON_COL;
-		ui1.set_color(color != null ? color : defaultColor);
-		kha_graphics2_GraphicsExtension.drawCircle(ui.g,ui._x + (element.width * zui_Canvas._ui.ops.scaleFactor | 0) / 2,ui._y + (element.height * zui_Canvas._ui.ops.scaleFactor | 0) / 2,ui._w / 2,element.strength);
-		ui.g.set_color(col);
-		break;
-	case 16:
-		var col = ui.g.get_color();
-		var ui1 = ui.g;
-		var color = element.color;
-		var defaultColor = zui_Canvas.getTheme(canvas.theme).BUTTON_COL;
-		ui1.set_color(color != null ? color : defaultColor);
-		ui.g.fillTriangle(ui._x + ui._w / 2,ui._y,ui._x,ui._y + (element.height * zui_Canvas._ui.ops.scaleFactor | 0),ui._x + ui._w,ui._y + (element.height * zui_Canvas._ui.ops.scaleFactor | 0));
-		ui.g.set_color(col);
-		break;
-	case 17:
-		var col = ui.g.get_color();
-		var ui1 = ui.g;
-		var color = element.color;
-		var defaultColor = zui_Canvas.getTheme(canvas.theme).BUTTON_COL;
-		ui1.set_color(color != null ? color : defaultColor);
-		ui.g.drawLine(ui._x + ui._w / 2,ui._y,ui._x,ui._y + (element.height * zui_Canvas._ui.ops.scaleFactor | 0),element.strength);
-		ui.g.drawLine(ui._x,ui._y + (element.height * zui_Canvas._ui.ops.scaleFactor | 0),ui._x + ui._w,ui._y + (element.height * zui_Canvas._ui.ops.scaleFactor | 0),element.strength);
-		ui.g.drawLine(ui._x + ui._w,ui._y + (element.height * zui_Canvas._ui.ops.scaleFactor | 0),ui._x + ui._w / 2,ui._y,element.strength);
-		ui.g.set_color(col);
-		break;
-	case 18:
-		var col = ui.g.get_color();
-		var progress = element.progress_at;
-		var totalprogress = element.progress_total;
-		var ui1 = ui.g;
-		var color = element.color_progress;
-		var defaultColor = zui_Canvas.getTheme(canvas.theme).TEXT_COL;
-		ui1.set_color(color != null ? color : defaultColor);
-		ui.g.fillRect(ui._x,ui._y,ui._w / totalprogress * Math.min(progress,totalprogress),element.height * zui_Canvas._ui.ops.scaleFactor | 0);
-		var ui1 = ui.g;
-		var color = element.color;
-		var defaultColor = zui_Canvas.getTheme(canvas.theme).BUTTON_COL;
-		ui1.set_color(color != null ? color : defaultColor);
-		ui.g.drawRect(ui._x,ui._y,ui._w,element.height * zui_Canvas._ui.ops.scaleFactor | 0,element.strength);
-		ui.g.set_color(col);
-		break;
-	case 19:
-		var col = ui.g.get_color();
-		var progress = element.progress_at;
-		var totalprogress = element.progress_total;
-		var ui1 = ui.g;
-		var color = element.color_progress;
-		var defaultColor = zui_Canvas.getTheme(canvas.theme).TEXT_COL;
-		ui1.set_color(color != null ? color : defaultColor);
-		kha_graphics2_GraphicsExtension.drawArc(ui.g,ui._x + (element.width * zui_Canvas._ui.ops.scaleFactor | 0) / 2,ui._y + (element.height * zui_Canvas._ui.ops.scaleFactor | 0) / 2,ui._w / 2,-Math.PI / 2,Math.PI * 2 / totalprogress * progress - Math.PI / 2,element.strength);
-		var ui1 = ui.g;
-		var color = element.color;
-		var defaultColor = zui_Canvas.getTheme(canvas.theme).BUTTON_COL;
-		ui1.set_color(color != null ? color : defaultColor);
-		kha_graphics2_GraphicsExtension.fillCircle(ui.g,ui._x + (element.width * zui_Canvas._ui.ops.scaleFactor | 0) / 2,ui._y + (element.height * zui_Canvas._ui.ops.scaleFactor | 0) / 2,ui._w / 2 - 10);
-		ui.g.set_color(col);
-		break;
-	case 20:
-		var color = element.color_text;
-		var defaultColor = zui_Canvas.getTheme(canvas.theme).TEXT_COL;
-		ui.t.TEXT_COL = color != null ? color : defaultColor;
-		var color = element.color_text;
-		var defaultColor = zui_Canvas.getTheme(canvas.theme).TEXT_COL;
-		ui.t.LABEL_COL = color != null ? color : defaultColor;
-		var color = element.color;
-		var defaultColor = zui_Canvas.getTheme(canvas.theme).BUTTON_COL;
-		ui.t.ACCENT_COL = color != null ? color : defaultColor;
-		var color = element.color_hover;
-		var defaultColor = zui_Canvas.getTheme(canvas.theme).BUTTON_HOVER_COL;
-		ui.t.ACCENT_HOVER_COL = color != null ? color : defaultColor;
-		zui_Canvas.h.nest(element.id).text = element.text;
-		zui_Ext.textArea(ui,zui_Canvas.h.nest(element.id),element.alignment,element.editable);
-		if(zui_Canvas.h.nest(element.id).changed) {
-			var e = element.event;
-			if(e != null && e != "") {
-				zui_Canvas.events.push(e);
-			}
-		}
-		break;
-	}
-	if(element.children != null) {
-		var _g = 0;
-		var _g1 = element.children;
-		while(_g < _g1.length) {
-			var id = _g1[_g];
-			++_g;
-			zui_Canvas.drawElement(ui,canvas,zui_Canvas.elemById(canvas,id),(element.x * zui_Canvas._ui.ops.scaleFactor | 0) + px,(element.y * zui_Canvas._ui.ops.scaleFactor | 0) + py);
-		}
-	}
-	if(rotated) {
-		ui.g.popTransformation();
-	}
-};
-zui_Canvas.getText = function(canvas,e) {
-	return e.text;
-};
-zui_Canvas.getAsset = function(canvas,asset) {
-	var _g = 0;
-	var _g1 = canvas.assets;
-	while(_g < _g1.length) {
-		var a = _g1[_g];
-		++_g;
-		if(a.name == asset) {
-			return zui_Canvas.assetMap.h[a.id];
-		}
-	}
-	return null;
-};
-zui_Canvas.getElementId = function(canvas) {
-	if(zui_Canvas.elemId == -1) {
-		var _g = 0;
-		var _g1 = canvas.elements;
-		while(_g < _g1.length) {
-			var e = _g1[_g];
-			++_g;
-			if(zui_Canvas.elemId < e.id) {
-				zui_Canvas.elemId = e.id;
-			}
-		}
-	}
-	return ++zui_Canvas.elemId;
-};
-zui_Canvas.getAssetId = function(canvas) {
-	if(zui_Canvas.assetId == -1) {
-		var _g = 0;
-		var _g1 = canvas.assets;
-		while(_g < _g1.length) {
-			var a = _g1[_g];
-			++_g;
-			if(zui_Canvas.assetId < a.id) {
-				zui_Canvas.assetId = a.id;
-			}
-		}
-	}
-	return ++zui_Canvas.assetId;
-};
-zui_Canvas.elemById = function(canvas,id) {
-	var _g = 0;
-	var _g1 = canvas.elements;
-	while(_g < _g1.length) {
-		var e = _g1[_g];
-		++_g;
-		if(e.id == id) {
-			return e;
-		}
-	}
-	return null;
-};
-zui_Canvas.scaled = function(f) {
-	return f * zui_Canvas._ui.ops.scaleFactor | 0;
-};
-zui_Canvas.getColor = function(color,defaultColor) {
-	if(color != null) {
-		return color;
-	} else {
-		return defaultColor;
-	}
-};
-zui_Canvas.getTheme = function(theme) {
-	var _g = 0;
-	var _g1 = zui_Canvas.themes;
-	while(_g < _g1.length) {
-		var t = _g1[_g];
-		++_g;
-		if(t.NAME == theme) {
-			return t;
-		}
-	}
-	return null;
-};
-zui_Canvas.getAnchorOffset = function(canvas,element) {
-	var boxWidth;
-	var boxHeight;
-	var offsetX = 0.0;
-	var offsetY = 0.0;
-	if(element.parent == null) {
-		boxWidth = canvas.width;
-		boxHeight = canvas.height;
-	} else {
-		var parent = zui_Canvas.elemById(canvas,element.parent);
-		boxWidth = parent.width * zui_Canvas._ui.ops.scaleFactor | 0;
-		boxHeight = parent.height * zui_Canvas._ui.ops.scaleFactor | 0;
-	}
-	switch(element.anchor) {
-	case 1:
-		offsetX += boxWidth / 2 - (element.width * zui_Canvas._ui.ops.scaleFactor | 0) / 2;
-		break;
-	case 2:
-		offsetX += boxWidth - (element.width * zui_Canvas._ui.ops.scaleFactor | 0);
-		break;
-	case 3:
-		offsetY += boxHeight / 2 - (element.height * zui_Canvas._ui.ops.scaleFactor | 0) / 2;
-		break;
-	case 4:
-		offsetX += boxWidth / 2 - (element.width * zui_Canvas._ui.ops.scaleFactor | 0) / 2;
-		offsetY += boxHeight / 2 - (element.height * zui_Canvas._ui.ops.scaleFactor | 0) / 2;
-		break;
-	case 5:
-		offsetX += boxWidth - (element.width * zui_Canvas._ui.ops.scaleFactor | 0);
-		offsetY += boxHeight / 2 - (element.height * zui_Canvas._ui.ops.scaleFactor | 0) / 2;
-		break;
-	case 6:
-		offsetY += boxHeight - (element.height * zui_Canvas._ui.ops.scaleFactor | 0);
-		break;
-	case 7:
-		offsetX += boxWidth / 2 - (element.width * zui_Canvas._ui.ops.scaleFactor | 0) / 2;
-		offsetY += boxHeight - (element.height * zui_Canvas._ui.ops.scaleFactor | 0);
-		break;
-	case 8:
-		offsetX += boxWidth - (element.width * zui_Canvas._ui.ops.scaleFactor | 0);
-		offsetY += boxHeight - (element.height * zui_Canvas._ui.ops.scaleFactor | 0);
-		break;
-	}
-	return [offsetX,offsetY];
-};
 var zui_Ext = function() { };
 $hxClasses["zui.Ext"] = zui_Ext;
 zui_Ext.__name__ = true;
@@ -29274,245 +29865,6 @@ zui_Ext.floatInput = function(ui,handle,label,align,precision) {
 	var text = ui.textInput(handle,label,align);
 	handle.value = parseFloat(text);
 	return handle.value;
-};
-zui_Ext.keyInput = function(ui,handle,label,align) {
-	if(align == null) {
-		align = 0;
-	}
-	if(label == null) {
-		label = "";
-	}
-	if(!ui.isVisible(ui.t.ELEMENT_H * ui.ops.scaleFactor)) {
-		ui.endElement();
-		return handle.value | 0;
-	}
-	var hover = ui.getHover();
-	if(hover && zui_Zui.onTextHover != null) {
-		zui_Zui.onTextHover();
-	}
-	ui.g.set_color(hover ? ui.t.ACCENT_HOVER_COL : ui.t.ACCENT_COL);
-	var g = ui.g;
-	var fill = ui.t.FILL_ACCENT_BG;
-	var x = ui._x + ui.buttonOffsetY;
-	var y = ui._y + ui.buttonOffsetY;
-	var w = ui._w - ui.buttonOffsetY * 2;
-	var h = ui.t.BUTTON_H * ui.ops.scaleFactor;
-	var strength = 0.0;
-	if(strength == 0.0) {
-		strength = 1;
-	}
-	if(!ui.enabled) {
-		ui.fadeColor();
-	}
-	if(fill) {
-		g.fillRect(x,y - 1,w,h + 1);
-	} else {
-		g.drawRect(x,y,w,h,strength);
-	}
-	var startEdit = ui.getReleased() || ui.tabPressed;
-	if(ui.textSelectedHandle != handle && startEdit) {
-		ui.startTextEdit(handle);
-	}
-	if(ui.textSelectedHandle == handle) {
-		zui_Ext.listenToKey(ui,handle);
-	} else {
-		handle.changed = false;
-	}
-	if(label != "") {
-		ui.g.set_color(ui.t.LABEL_COL);
-		var labelAlign = align == 2 ? 0 : 2;
-		var xOffset = labelAlign == 0 ? 7 : 0;
-		ui.drawString(ui.g,label,xOffset,0,labelAlign);
-	}
-	handle.text = zui_Ext.keycodeToString(handle.value | 0);
-	ui.g.set_color(ui.t.TEXT_COL);
-	if(ui.textSelectedHandle != handle) {
-		ui.drawString(ui.g,handle.text,null,0,align);
-	} else {
-		ui.drawString(ui.g,ui.textSelected,null,0,align);
-	}
-	ui.endElement();
-	return handle.value | 0;
-};
-zui_Ext.listenToKey = function(ui,handle) {
-	if(ui.isKeyDown) {
-		handle.value = ui.key;
-		handle.changed = ui.changed = true;
-		ui.textSelectedHandle = null;
-		ui.isTyping = false;
-		if(kha_input_Keyboard.get() != null) {
-			kha_input_Keyboard.get().hide();
-		}
-	} else {
-		ui.textSelected = "Press a key...";
-	}
-};
-zui_Ext.list = function(ui,handle,ar,opts) {
-	var selected = 0;
-	if(opts == null) {
-		opts = { };
-	}
-	var addCb = opts.addCb != null ? opts.addCb : function(name) {
-		ar.push(name);
-	};
-	var removeCb = opts.removeCb != null ? opts.removeCb : function(i) {
-		ar.splice(i,1);
-	};
-	var getNameCb = opts.getNameCb != null ? opts.getNameCb : function(i) {
-		return ar[i];
-	};
-	var setNameCb = opts.setNameCb != null ? opts.setNameCb : function(i,name) {
-		ar[i] = name;
-	};
-	var getLabelCb = opts.getLabelCb != null ? opts.getLabelCb : function(i) {
-		return "";
-	};
-	var itemDrawCb = opts.itemDrawCb;
-	var showRadio = opts.showRadio != null && opts.showRadio;
-	var editable = opts.editable != null ? opts.editable : true;
-	var showAdd = opts.showAdd != null ? opts.showAdd : true;
-	var addLabel = opts.addLabel != null ? opts.addLabel : "Add";
-	var i = 0;
-	while(i < ar.length) {
-		if(showRadio) {
-			ui.row([0.12,0.68,0.2]);
-			if(ui.radio(handle.nest(0),i,"")) {
-				selected = i;
-			}
-		} else {
-			ui.row([0.8,0.2]);
-		}
-		var itemHandle = handle.nest(i);
-		itemHandle.text = getNameCb(i);
-		if(editable) {
-			setNameCb(i,ui.textInput(itemHandle,getLabelCb(i)));
-		} else {
-			ui.text(getNameCb(i));
-		}
-		if(ui.button("X")) {
-			removeCb(i);
-		} else {
-			++i;
-		}
-		if(itemDrawCb != null) {
-			itemDrawCb(itemHandle.nest(i),i - 1);
-		}
-	}
-	if(showAdd && ui.button(addLabel)) {
-		addCb("untitled");
-	}
-	return selected;
-};
-zui_Ext.panelList = function(ui,handle,ar,addCb,removeCb,getNameCb,setNameCb,itemDrawCb,editable,showAdd,addLabel) {
-	if(addLabel == null) {
-		addLabel = "Add";
-	}
-	if(showAdd == null) {
-		showAdd = true;
-	}
-	if(editable == null) {
-		editable = true;
-	}
-	if(addCb == null) {
-		addCb = function(name) {
-			ar.push(name);
-		};
-	}
-	if(removeCb == null) {
-		removeCb = function(i) {
-			ar.splice(i,1);
-		};
-	}
-	if(getNameCb == null) {
-		getNameCb = function(i) {
-			return ar[i];
-		};
-	}
-	if(setNameCb == null) {
-		setNameCb = function(i,name) {
-			ar[i] = name;
-		};
-	}
-	var i = 0;
-	while(i < ar.length) {
-		ui.row([0.12,0.68,0.2]);
-		var expanded = ui.panel(handle.nest(i),"");
-		var itemHandle = handle.nest(i);
-		if(editable) {
-			setNameCb(i,ui.textInput(itemHandle,getNameCb(i)));
-		} else {
-			ui.text(getNameCb(i));
-		}
-		if(ui.button("X")) {
-			removeCb(i);
-		} else {
-			++i;
-		}
-		if(itemDrawCb != null && expanded) {
-			itemDrawCb(itemHandle.nest(i),i - 1);
-		}
-	}
-	if(showAdd && ui.button(addLabel)) {
-		addCb("untitled");
-	}
-};
-zui_Ext.colorField = function(ui,handle,alpha) {
-	if(alpha == null) {
-		alpha = false;
-	}
-	ui.g.set_color(handle.color);
-	var g = ui.g;
-	var x = ui._x + 2;
-	var y = ui._y + ui.buttonOffsetY;
-	var w = ui._w - 4;
-	var h = ui.t.BUTTON_H * ui.ops.scaleFactor;
-	var strength = 0.0;
-	if(strength == 0.0) {
-		strength = 1;
-	}
-	if(!ui.enabled) {
-		ui.fadeColor();
-	}
-	g.fillRect(x,y - 1,w,h + 1);
-	ui.g.set_color(ui.getHover() ? ui.t.ACCENT_HOVER_COL : ui.t.ACCENT_COL);
-	var g = ui.g;
-	var x = ui._x + 2;
-	var y = ui._y + ui.buttonOffsetY;
-	var w = ui._w - 4;
-	var h = ui.t.BUTTON_H * ui.ops.scaleFactor;
-	var strength = 1.0;
-	if(strength == null) {
-		strength = 0.0;
-	}
-	if(strength == 0.0) {
-		strength = 1;
-	}
-	if(!ui.enabled) {
-		ui.fadeColor();
-	}
-	g.drawRect(x,y,w,h,strength);
-	if(ui.getStarted()) {
-		zui_Popup.showCustom(new zui_Zui(ui.ops),function(ui) {
-			zui_Ext.colorWheel(ui,handle,alpha);
-		},ui.inputX | 0,ui.inputY | 0,200,500);
-	}
-	ui.endElement();
-	return handle.color;
-};
-zui_Ext.colorPicker = function(ui,handle,alpha) {
-	if(alpha == null) {
-		alpha = false;
-	}
-	var r = ui.slider(handle.nest(0,{ value : ((handle.color & 16711680) >>> 16) * 0.00392156862745098}),"R",0,1,true);
-	var g = ui.slider(handle.nest(1,{ value : ((handle.color & 65280) >>> 8) * 0.00392156862745098}),"G",0,1,true);
-	var b = ui.slider(handle.nest(2,{ value : (handle.color & 255) * 0.00392156862745098}),"B",0,1,true);
-	var a = (handle.color >>> 24) * 0.00392156862745098;
-	if(alpha) {
-		a = ui.slider(handle.nest(3,{ value : a}),"A",0,1,true);
-	}
-	var col = kha_Color.fromFloats(r,g,b,a);
-	ui.text("",2,col);
-	return col;
 };
 zui_Ext.initPath = function(handle,systemId) {
 	handle.text = systemId == "Windows" ? "C:\\Users" : "/";
@@ -29817,311 +30169,6 @@ zui_Ext.menuButton = function(ui,text) {
 zui_Ext.MENUBAR_H = function(ui) {
 	return ui.t.BUTTON_H * ui.ops.scaleFactor * 1.1 + 2 + ui.buttonOffsetY;
 };
-zui_Ext.keycodeToString = function(keycode) {
-	switch(keycode) {
-	case -1:
-		return "None";
-	case 0:
-		return "Unknown";
-	case 1:
-		return "Back";
-	case 3:
-		return "Cancel";
-	case 6:
-		return "Help";
-	case 8:
-		return "Backspace";
-	case 9:
-		return "Tab";
-	case 12:
-		return "Clear";
-	case 13:
-		return "Return";
-	case 16:
-		return "Shift";
-	case 17:
-		return "Ctrl";
-	case 18:
-		return "Alt";
-	case 19:
-		return "Pause";
-	case 20:
-		return "CapsLock";
-	case 21:
-		return "Kana";
-	case 22:
-		return "Eisu";
-	case 23:
-		return "Junja";
-	case 24:
-		return "Final";
-	case 25:
-		return "Hanja";
-	case 27:
-		return "Esc";
-	case 28:
-		return "Convert";
-	case 29:
-		return "NonConvert";
-	case 30:
-		return "Accept";
-	case 31:
-		return "ModeChange";
-	case 32:
-		return "Space";
-	case 33:
-		return "PageUp";
-	case 34:
-		return "PageDown";
-	case 35:
-		return "End";
-	case 36:
-		return "Home";
-	case 37:
-		return "Left";
-	case 38:
-		return "Up";
-	case 39:
-		return "Right";
-	case 40:
-		return "Down";
-	case 41:
-		return "Select";
-	case 42:
-		return "Print";
-	case 43:
-		return "Execute";
-	case 44:
-		return "PrintScreen";
-	case 45:
-		return "Insert";
-	case 46:
-		return "Delete";
-	case 58:
-		return "Colon";
-	case 59:
-		return "Semicolon";
-	case 60:
-		return "LessThan";
-	case 61:
-		return "Equals";
-	case 62:
-		return "GreaterThan";
-	case 63:
-		return "QuestionMark";
-	case 64:
-		return "At";
-	case 91:
-		return "Win";
-	case 93:
-		return "ContextMenu";
-	case 95:
-		return "Sleep";
-	case 96:
-		return "Numpad0";
-	case 97:
-		return "Numpad1";
-	case 98:
-		return "Numpad2";
-	case 99:
-		return "Numpad3";
-	case 100:
-		return "Numpad4";
-	case 101:
-		return "Numpad5";
-	case 102:
-		return "Numpad6";
-	case 103:
-		return "Numpad7";
-	case 104:
-		return "Numpad8";
-	case 105:
-		return "Numpad9";
-	case 106:
-		return "Multiply";
-	case 107:
-		return "Add";
-	case 108:
-		return "Separator";
-	case 109:
-		return "Subtract";
-	case 110:
-		return "Decimal";
-	case 111:
-		return "Divide";
-	case 112:
-		return "F1";
-	case 113:
-		return "F2";
-	case 114:
-		return "F3";
-	case 115:
-		return "F4";
-	case 116:
-		return "F5";
-	case 117:
-		return "F6";
-	case 118:
-		return "F7";
-	case 119:
-		return "F8";
-	case 120:
-		return "F9";
-	case 121:
-		return "F10";
-	case 122:
-		return "F11";
-	case 123:
-		return "F12";
-	case 124:
-		return "F13";
-	case 125:
-		return "F14";
-	case 126:
-		return "F15";
-	case 127:
-		return "F16";
-	case 128:
-		return "F17";
-	case 129:
-		return "F18";
-	case 130:
-		return "F19";
-	case 131:
-		return "F20";
-	case 132:
-		return "F21";
-	case 133:
-		return "F22";
-	case 134:
-		return "F23";
-	case 135:
-		return "F24";
-	case 144:
-		return "NumLock";
-	case 145:
-		return "ScrollLock";
-	case 146:
-		return "WinOemFjJisho";
-	case 147:
-		return "WinOemFjMasshou";
-	case 148:
-		return "WinOemFjTouroku";
-	case 149:
-		return "WinOemFjLoya";
-	case 150:
-		return "WinOemFjRoya";
-	case 160:
-		return "Circumflex";
-	case 161:
-		return "Exclamation";
-	case 162:
-		return "DoubleQuote";
-	case 163:
-		return "Hash";
-	case 164:
-		return "Dollar";
-	case 165:
-		return "Percent";
-	case 166:
-		return "Ampersand";
-	case 167:
-		return "Underscore";
-	case 168:
-		return "OpenParen";
-	case 169:
-		return "CloseParen";
-	case 170:
-		return "Asterisk";
-	case 171:
-		return "Plus";
-	case 172:
-		return "Pipe";
-	case 173:
-		return "HyphenMinus";
-	case 174:
-		return "OpenCurlyBracket";
-	case 175:
-		return "CloseCurlyBracket";
-	case 176:
-		return "Tilde";
-	case 181:
-		return "VolumeMute";
-	case 182:
-		return "VolumeDown";
-	case 183:
-		return "VolumeUp";
-	case 188:
-		return "Comma";
-	case 190:
-		return "Period";
-	case 191:
-		return "Slash";
-	case 192:
-		return "BackQuote";
-	case 219:
-		return "OpenBracket";
-	case 220:
-		return "BackSlash";
-	case 221:
-		return "CloseBracket";
-	case 222:
-		return "Quote";
-	case 224:
-		return "Meta";
-	case 225:
-		return "AltGr";
-	case 227:
-		return "WinIcoHelp";
-	case 228:
-		return "WinIco00";
-	case 230:
-		return "WinIcoClear";
-	case 233:
-		return "WinOemReset";
-	case 234:
-		return "WinOemJump";
-	case 235:
-		return "WinOemPA1";
-	case 236:
-		return "WinOemPA2";
-	case 237:
-		return "WinOemPA3";
-	case 238:
-		return "WinOemWSCTRL";
-	case 239:
-		return "WinOemCUSEL";
-	case 240:
-		return "WinOemATTN";
-	case 241:
-		return "WinOemFinish";
-	case 242:
-		return "WinOemCopy";
-	case 243:
-		return "WinOemAuto";
-	case 244:
-		return "WinOemENLW";
-	case 245:
-		return "WinOemBackTab";
-	case 246:
-		return "ATTN";
-	case 247:
-		return "CRSEL";
-	case 248:
-		return "EXSEL";
-	case 249:
-		return "EREOF";
-	case 250:
-		return "Play";
-	case 251:
-		return "Zoom";
-	case 253:
-		return "PA1";
-	case 254:
-		return "WinOemClear";
-	}
-	return String.fromCodePoint(keycode);
-};
 zui_Ext.dist = function(x1,y1,x2,y2) {
 	var vx = x1 - x2;
 	var vy = y1 - y2;
@@ -30179,125 +30226,6 @@ zui_Ext.rgbToHsv = function(cR,cG,cB,out) {
 var zui_Id = function() { };
 $hxClasses["zui.Id"] = zui_Id;
 zui_Id.__name__ = true;
-var zui_Popup = function() { };
-$hxClasses["zui.Popup"] = zui_Popup;
-zui_Popup.__name__ = true;
-zui_Popup.render = function(g) {
-	if(zui_Popup.boxCommands == null) {
-		zui_Popup.ui.begin(g);
-		if(zui_Popup.ui.window(zui_Popup.hwnd,zui_Popup.modalX,zui_Popup.modalY,zui_Popup.modalW,zui_Popup.modalH)) {
-			zui_Popup.drawTitle(g);
-			var _g = 0;
-			var _g1 = zui_Popup.boxText.split("\n");
-			while(_g < _g1.length) {
-				var line = _g1[_g];
-				++_g;
-				zui_Popup.ui.text(line);
-			}
-			zui_Popup.ui._y = zui_Popup.ui._h - zui_Popup.ui.t.BUTTON_H - 10;
-			zui_Popup.ui.row([0.33333333333333331,0.33333333333333331,0.33333333333333331]);
-			zui_Popup.ui.endElement();
-			if(zui_Popup.ui.button("OK")) {
-				zui_Popup.show = false;
-			}
-		}
-		zui_Popup.ui.end();
-	} else {
-		zui_Popup.ui.begin(g);
-		if(zui_Popup.ui.window(zui_Popup.hwnd,zui_Popup.modalX,zui_Popup.modalY,zui_Popup.modalW,zui_Popup.modalH)) {
-			zui_Popup.drawTitle(g);
-			zui_Popup.ui._y += 10;
-			zui_Popup.boxCommands(zui_Popup.ui);
-		}
-		zui_Popup.ui.end();
-	}
-};
-zui_Popup.drawTitle = function(g) {
-	if(zui_Popup.boxTitle != "") {
-		g.set_color(zui_Popup.ui.t.SEPARATOR_COL);
-		var _this = zui_Popup.ui;
-		var x = zui_Popup.ui._x;
-		var y = zui_Popup.ui._y;
-		var w = zui_Popup.ui._w;
-		var h = zui_Popup.ui.t.BUTTON_H;
-		var strength = 0.0;
-		if(strength == 0.0) {
-			strength = 1;
-		}
-		if(!_this.enabled) {
-			_this.fadeColor();
-		}
-		g.fillRect(x,y - 1,w,h + 1);
-		g.set_color(zui_Popup.ui.t.TEXT_COL);
-		zui_Popup.ui.text(zui_Popup.boxTitle);
-	}
-};
-zui_Popup.update = function() {
-	var inUse = zui_Popup.ui.comboSelectedHandle != null;
-	if(zui_Popup.ui.inputStarted && !inUse) {
-		if(zui_Popup.ui.inputX < zui_Popup.modalX || zui_Popup.ui.inputX > zui_Popup.modalX + zui_Popup.modalW || zui_Popup.ui.inputY < zui_Popup.modalY || zui_Popup.ui.inputY > zui_Popup.modalY + zui_Popup.modalH) {
-			zui_Popup.show = false;
-		}
-	}
-};
-zui_Popup.showMessage = function(ui,title,text) {
-	zui_Popup.ui = ui;
-	zui_Popup.init();
-	zui_Popup.boxTitle = title;
-	zui_Popup.boxText = text;
-	zui_Popup.boxCommands = null;
-};
-zui_Popup.showCustom = function(ui,commands,mx,my,mw,mh) {
-	if(mh == null) {
-		mh = 160;
-	}
-	if(mw == null) {
-		mw = 400;
-	}
-	if(my == null) {
-		my = -1;
-	}
-	if(mx == null) {
-		mx = -1;
-	}
-	zui_Popup.ui = ui;
-	zui_Popup.init(mx,my,mw,mh);
-	zui_Popup.boxTitle = "";
-	zui_Popup.boxText = "";
-	zui_Popup.boxCommands = commands;
-};
-zui_Popup.init = function(mx,my,mw,mh) {
-	if(mh == null) {
-		mh = 160;
-	}
-	if(mw == null) {
-		mw = 400;
-	}
-	if(my == null) {
-		my = -1;
-	}
-	if(mx == null) {
-		mx = -1;
-	}
-	var appW = kha_System.windowWidth();
-	var appH = kha_System.windowHeight();
-	zui_Popup.modalX = mx;
-	zui_Popup.modalY = my;
-	zui_Popup.modalW = mw * zui_Popup.ui.ops.scaleFactor | 0;
-	zui_Popup.modalH = mh * zui_Popup.ui.ops.scaleFactor | 0;
-	if(mx == -1) {
-		zui_Popup.modalX = appW / 2 - zui_Popup.modalW / 2 | 0;
-	}
-	if(my == -1) {
-		zui_Popup.modalY = appH / 2 - zui_Popup.modalH / 2 | 0;
-	}
-	zui_Popup.modalX = Math.max(0,Math.min(zui_Popup.modalX,appW - zui_Popup.modalW)) | 0;
-	zui_Popup.modalY = Math.max(0,Math.min(zui_Popup.modalY,appH - zui_Popup.modalH)) | 0;
-	zui_Popup.hwnd.dragX = 0;
-	zui_Popup.hwnd.dragY = 0;
-	zui_Popup.hwnd.scrollOffset = 0.0;
-	zui_Popup.show = true;
-};
 var zui_Themes = function() { };
 $hxClasses["zui.Themes"] = zui_Themes;
 zui_Themes.__name__ = true;
@@ -30361,6 +30289,10 @@ var zui_Zui = function(ops) {
 	this.inputRegistered = false;
 	this.touchHold = false;
 	this.highlightFullRow = false;
+	this.windowBorderRight = 0;
+	this.windowBorderLeft = 0;
+	this.windowBorderBottom = 0;
+	this.windowBorderTop = 0;
 	this.tabSwitchEnabled = true;
 	this.highlightOnSelect = true;
 	this.alwaysRedraw = false;
@@ -30398,7 +30330,9 @@ var zui_Zui = function(ops) {
 		kha_System.notifyOnFrames(function(frames) {
 			if((zui_Zui.isCopy || zui_Zui.isPaste) && ++zui_Zui.copyFrame > 1) {
 				zui_Zui.isCopy = zui_Zui.isCut = zui_Zui.isPaste = false;
+			} else if(zui_Zui.copyFrame > 1 && ++zui_Zui.copyFrame > 2) {
 				zui_Zui.copyFrame = 0;
+				zui_Zui.textToPaste = "";
 			}
 		});
 	}
@@ -30409,15 +30343,6 @@ var zui_Zui = function(ops) {
 };
 $hxClasses["zui.Zui"] = zui_Zui;
 zui_Zui.__name__ = true;
-zui_Zui.clampi = function(value,min,max) {
-	if(value < min) {
-		return min;
-	} else if(value > max) {
-		return max;
-	} else {
-		return value;
-	}
-};
 zui_Zui.prototype = {
 	isScrolling: null
 	,isTyping: null
@@ -30432,6 +30357,10 @@ zui_Zui.prototype = {
 	,alwaysRedraw: null
 	,highlightOnSelect: null
 	,tabSwitchEnabled: null
+	,windowBorderTop: null
+	,windowBorderBottom: null
+	,windowBorderLeft: null
+	,windowBorderRight: null
 	,highlightFullRow: null
 	,touchHold: null
 	,inputRegistered: null
@@ -30516,8 +30445,6 @@ zui_Zui.prototype = {
 	,comboSelectedWindow: null
 	,comboSelectedAlign: null
 	,comboSelectedTexts: null
-	,comboItemCount: null
-	,comboItemOffset: null
 	,comboSelectedLabel: null
 	,comboSelectedX: null
 	,comboSelectedY: null
@@ -30602,6 +30529,7 @@ zui_Zui.prototype = {
 		}
 		this.changed = false;
 		this.globalG = g;
+		zui_Zui.current = this;
 		this._x = 0;
 		this._y = 0;
 		this._w = 0;
@@ -30670,7 +30598,6 @@ zui_Zui.prototype = {
 		this.inputDX = 0;
 		this.inputDY = 0;
 		this.inputWheelDelta = 0;
-		zui_Zui.textToPaste = "";
 		if(zui_Zui.keyRepeat && this.isKeyDown && kha_Scheduler.time() - zui_Zui.keyRepeatTime > 0.05) {
 			if(this.key == 8 || this.key == 46 || this.key == 37 || this.key == 39 || this.key == 38 || this.key == 40) {
 				zui_Zui.keyRepeatTime = kha_Scheduler.time();
@@ -30906,9 +30833,11 @@ zui_Zui.prototype = {
 		}
 		var tabX = 0.0;
 		var tabY = 0.0;
-		var tabH = this.t.BUTTON_H * this.ops.scaleFactor * 1.1 | 0;
+		var tabHMin = this.t.BUTTON_H * this.ops.scaleFactor * 1.1 | 0;
+		var headerH = this.currentWindow.dragEnabled ? 15 * this.ops.scaleFactor | 0 : 0;
+		var tabH = this.t.FULL_TABS && this.tabVertical ? (this._windowH - headerH) / this.tabNames.length | 0 : tabHMin;
 		var origy = this._y;
-		this._y = this.currentWindow.dragEnabled ? 15 * this.ops.scaleFactor | 0 : 0;
+		this._y = headerH;
 		this.tabHandle.changed = false;
 		if(this.isCtrlDown && this.isTabDown) {
 			this.tabHandle.position++;
@@ -30940,10 +30869,10 @@ zui_Zui.prototype = {
 			var i = _g++;
 			this._x = tabX;
 			this._y = basey + tabY;
-			this._w = this.tabVertical ? this.t.ELEMENT_W * this.ops.scaleFactor - this.ops.scaleFactor | 0 : this.ops.font.width(this.fontSize,this.tabNames[i]) + this.buttonOffsetY * 2 + 18 * this.ops.scaleFactor | 0;
-			var released = this.getReleased();
-			var pushed = this.getPushed();
-			var hover = this.getHover();
+			this._w = this.tabVertical ? this.t.ELEMENT_W * this.ops.scaleFactor - this.ops.scaleFactor | 0 : this.t.FULL_TABS ? this._windowW / this.tabNames.length | 0 : this.ops.font.width(this.fontSize,this.tabNames[i]) + this.buttonOffsetY * 2 + 18 * this.ops.scaleFactor | 0;
+			var released = this.getReleased(tabH);
+			var pushed = this.getPushed(tabH);
+			var hover = this.getHover(tabH);
 			if(released) {
 				var h = this.tabHandle.nest(this.tabHandle.position);
 				h.scrollOffset = this.currentWindow.scrollOffset;
@@ -30973,7 +30902,7 @@ zui_Zui.prototype = {
 			}
 			g.fillRect(x,y - 1,w,tabH + 1);
 			this.g.set_color(selected ? this.t.BUTTON_TEXT_COL : this.t.LABEL_COL);
-			this.drawString(this.g,this.tabNames[i],null,0,0);
+			this.drawString(this.g,this.tabNames[i],null,(tabH - tabHMin) / 2,this.t.FULL_TABS ? 1 : 0);
 			if(selected && !this.tabVertical) {
 				this.g.set_color(this.t.WINDOW_BG_COL);
 				this.g.fillRect(this._x + this.buttonOffsetY + 1,this._y + this.buttonOffsetY + tabH,this._w - 1,1);
@@ -31284,6 +31213,7 @@ zui_Zui.prototype = {
 			this.cursorX += zui_Zui.textToPaste.length;
 			this.highlightAnchor = this.cursorX;
 			zui_Zui.textToPaste = "";
+			zui_Zui.isPaste = false;
 		}
 		if(this.highlightAnchor == this.cursorX) {
 			zui_Zui.textToCopy = text;
@@ -31493,10 +31423,7 @@ zui_Zui.prototype = {
 		this.endElement();
 		return handle.position == position;
 	}
-	,combo: function(handle,texts,label,showLabel,align,itemCount) {
-		if(itemCount == null) {
-			itemCount = -1;
-		}
+	,combo: function(handle,texts,label,showLabel,align) {
 		if(align == null) {
 			align = 0;
 		}
@@ -31521,8 +31448,6 @@ zui_Zui.prototype = {
 				this.comboSelectedX = this._x + this._windowX | 0;
 				this.comboSelectedY = this._y + this._windowY + this.t.ELEMENT_H * this.ops.scaleFactor | 0;
 				this.comboSelectedW = this._w | 0;
-				this.comboItemCount = itemCount < 0 ? texts.length : itemCount;
-				this.comboItemOffset = -1;
 				this.comboToSubmit = handle.position;
 			}
 		}
@@ -31532,16 +31457,6 @@ zui_Zui.prototype = {
 			handle.changed = this.changed = true;
 		} else {
 			handle.changed = false;
-		}
-		if(this.inputWheelDelta != 0 && this.comboSelectedHandle != null) {
-			this.comboItemOffset += this.inputWheelDelta > 0 ? 1 : -1;
-			var maxOffset = this.comboSelectedTexts.length - this.comboItemCount;
-			if(this.comboItemOffset > maxOffset) {
-				this.comboItemOffset = maxOffset;
-			}
-			if(this.comboItemOffset < 0) {
-				this.comboItemOffset = 0;
-			}
 		}
 		var hover = this.getHover();
 		if(hover) {
@@ -31840,20 +31755,17 @@ zui_Zui.prototype = {
 		}
 		var _g = this.g;
 		this.globalG.set_color(this.t.SEPARATOR_COL);
-		var maxItemCount = Math.min(this.comboSelectedTexts.length,this.comboItemCount) | 0;
-		var comboH = (maxItemCount + (this.comboSelectedLabel != "" ? 1 : 0)) * (this.t.ELEMENT_H * this.ops.scaleFactor | 0);
 		this.globalG.begin(false);
+		var comboH = (this.comboSelectedTexts.length + (this.comboSelectedLabel != "" ? 1 : 0)) * (this.t.ELEMENT_H * this.ops.scaleFactor | 0);
 		var distTop = this.comboSelectedY - comboH - (this.t.ELEMENT_H * this.ops.scaleFactor | 0);
 		var distBottom = kha_System.windowHeight() - (this.comboSelectedY + comboH);
-		var outOfScreen = distBottom < 0 && distBottom < distTop;
-		var comboY = outOfScreen ? this.comboSelectedY - comboH - (this.t.ELEMENT_H * this.ops.scaleFactor | 0) : this.comboSelectedY;
-		this.globalG.fillRect(this.comboSelectedX,comboY,this.comboSelectedW,comboH);
-		this.beginRegion(this.globalG,this.comboSelectedX,comboY,this.comboSelectedW);
+		var unrollUp = distBottom < 0 && distBottom < distTop;
+		this.beginRegion(this.globalG,this.comboSelectedX,this.comboSelectedY,this.comboSelectedW);
 		if(this.isKeyPressed) {
-			if(this.key == (outOfScreen ? 40 : 38) && this.comboToSubmit > 0) {
+			if(this.key == (unrollUp ? 40 : 38) && this.comboToSubmit > 0) {
 				this.comboToSubmit--;
 				this.submitComboHandle = this.comboSelectedHandle;
-			} else if(this.key == (outOfScreen ? 38 : 40) && this.comboToSubmit < this.comboSelectedTexts.length - 1) {
+			} else if(this.key == (unrollUp ? 38 : 40) && this.comboToSubmit < this.comboSelectedTexts.length - 1) {
 				this.comboToSubmit++;
 				this.submitComboHandle = this.comboSelectedHandle;
 			}
@@ -31861,54 +31773,49 @@ zui_Zui.prototype = {
 				this.comboSelectedWindow.redraws = 2;
 			}
 		}
-		if(this.comboItemOffset == -1) {
-			if(outOfScreen) {
-				this.comboItemOffset = this.comboSelectedTexts.length - 1 - this.comboSelectedHandle.position;
-			} else {
-				this.comboItemOffset = this.comboSelectedHandle.position;
-			}
-			var value = this.comboItemOffset;
-			var max = this.comboSelectedTexts.length - maxItemCount;
-			this.comboItemOffset = value < 0 ? 0 : value > max ? max : value;
-		}
-		if(outOfScreen && this.comboSelectedLabel != "") {
-			this.g.set_color(this.t.LABEL_COL);
-			this.drawString(this.g,this.comboSelectedLabel,null,0,2);
-			this._y += this.t.ELEMENT_H * this.ops.scaleFactor;
-			this.fill(0,0,this._w / this.ops.scaleFactor,this.ops.scaleFactor,this.t.ACCENT_SELECT_COL);
-		}
 		this.inputEnabled = true;
 		var _BUTTON_COL = this.t.BUTTON_COL;
 		var _ELEMENT_OFFSET = this.t.ELEMENT_OFFSET;
 		this.t.ELEMENT_OFFSET = 0;
-		var _g1 = this.comboItemOffset;
-		var _g2 = this.comboItemOffset + maxItemCount;
+		var unrollRight = this._x + this.comboSelectedW * 2 < kha_System.windowWidth() - this.windowBorderRight ? 1 : -1;
+		var _g1 = 0;
+		var _g2 = this.comboSelectedTexts.length;
 		while(_g1 < _g2) {
 			var i = _g1++;
-			var j = outOfScreen ? this.comboSelectedTexts.length - 1 - i : i;
-			this.t.BUTTON_COL = j == this.comboSelectedHandle.position ? this.t.ACCENT_SELECT_COL : this.t.SEPARATOR_COL;
-			if(this.button(this.comboSelectedTexts[j],this.comboSelectedAlign)) {
-				this.comboToSubmit = j;
+			if(unrollUp) {
+				this._y -= this.t.ELEMENT_H * this.ops.scaleFactor * 2;
+			}
+			this.t.BUTTON_COL = i == this.comboSelectedHandle.position ? this.t.ACCENT_SELECT_COL : this.t.SEPARATOR_COL;
+			this.fill(0,0,this._w / this.ops.scaleFactor,this.t.ELEMENT_H * this.ops.scaleFactor / this.ops.scaleFactor,this.t.SEPARATOR_COL);
+			if(this.button(this.comboSelectedTexts[i],this.comboSelectedAlign)) {
+				this.comboToSubmit = i;
 				this.submitComboHandle = this.comboSelectedHandle;
 				if(this.comboSelectedWindow != null) {
 					this.comboSelectedWindow.redraws = 2;
 				}
 				break;
 			}
+			if(this._y + this.t.ELEMENT_H * this.ops.scaleFactor > kha_System.windowHeight() - this.windowBorderBottom || this._y - this.t.ELEMENT_H * this.ops.scaleFactor * 2 < this.windowBorderTop) {
+				this._x += this.comboSelectedW * unrollRight;
+				this._y = this.comboSelectedY;
+			}
 		}
 		this.t.BUTTON_COL = _BUTTON_COL;
 		this.t.ELEMENT_OFFSET = _ELEMENT_OFFSET;
-		if(!outOfScreen && this.comboSelectedLabel != "") {
-			this.fill(0,0,this._w / this.ops.scaleFactor,this.ops.scaleFactor,this.t.ACCENT_SELECT_COL);
-			this.g.set_color(this.t.LABEL_COL);
-			this.drawString(this.g,this.comboSelectedLabel,null,0,2);
-		}
-		var maxOffset = this.comboSelectedTexts.length - this.comboItemCount;
-		if(maxOffset > 0) {
-			var barH = Math.max(this.comboItemCount / this.comboSelectedTexts.length * (this.t.ELEMENT_H * this.ops.scaleFactor) * 16,this.t.ELEMENT_H * this.ops.scaleFactor);
-			var off = (comboH - barH - this.t.ELEMENT_H * this.ops.scaleFactor) * this.comboItemOffset / maxOffset;
-			this.g.set_color(this.t.ACCENT_COL);
-			this.g.fillRect(this._x + this._w - (this.t.SCROLL_W * this.ops.scaleFactor | 0) / 3,comboY + off,(this.t.SCROLL_W * this.ops.scaleFactor | 0) / 3,barH);
+		if(this.comboSelectedLabel != "") {
+			if(unrollUp) {
+				this._y -= this.t.ELEMENT_H * this.ops.scaleFactor * 2;
+				this.fill(0,0,this._w / this.ops.scaleFactor,this.t.ELEMENT_H * this.ops.scaleFactor / this.ops.scaleFactor,this.t.SEPARATOR_COL);
+				this.g.set_color(this.t.LABEL_COL);
+				this.drawString(this.g,this.comboSelectedLabel,null,0,2);
+				this._y += this.t.ELEMENT_H * this.ops.scaleFactor;
+				this.fill(0,0,this._w / this.ops.scaleFactor,this.ops.scaleFactor,this.t.ACCENT_SELECT_COL);
+			} else {
+				this.fill(0,0,this._w / this.ops.scaleFactor,this.t.ELEMENT_H * this.ops.scaleFactor / this.ops.scaleFactor,this.t.SEPARATOR_COL);
+				this.fill(0,0,this._w / this.ops.scaleFactor,this.ops.scaleFactor,this.t.ACCENT_SELECT_COL);
+				this.g.set_color(this.t.LABEL_COL);
+				this.drawString(this.g,this.comboSelectedLabel,null,0,2);
+			}
 		}
 		if((this.inputReleased || this.isEscapeDown || this.isReturnDown) && !zui_Zui.comboFirst) {
 			this.comboSelectedHandle = null;
@@ -32467,6 +32374,24 @@ arm2d_ElementController.rotate = false;
 arm2d_ElementController.newElementSelected = false;
 zui_Handle.global = new zui_Handle();
 arm2d_ui_UIProperties.hwin = zui_Handle.global.nest(1,null);
+armory_ui_Canvas.assetMap = new haxe_ds_IntMap();
+armory_ui_Canvas.themes = [];
+armory_ui_Canvas.events = [];
+armory_ui_Canvas.screenW = -1;
+armory_ui_Canvas.screenH = -1;
+armory_ui_Canvas.locale = "en";
+armory_ui_Canvas.h = new zui_Handle();
+armory_ui_Canvas.elemId = -1;
+armory_ui_Canvas.assetId = -1;
+armory_ui_Popup.show = false;
+armory_ui_Popup.hwnd = new zui_Handle();
+armory_ui_Popup.boxTitle = "";
+armory_ui_Popup.boxText = "";
+armory_ui_Popup.modalX = 0;
+armory_ui_Popup.modalY = 0;
+armory_ui_Popup.modalW = 400;
+armory_ui_Popup.modalH = 160;
+armory_ui_Themes.light = { NAME : "Default Light", WINDOW_BG_COL : -1052689, WINDOW_TINT_COL : -14540254, ACCENT_COL : -1118482, ACCENT_HOVER_COL : -4473925, ACCENT_SELECT_COL : -5592406, BUTTON_COL : -3355444, BUTTON_TEXT_COL : -14540254, BUTTON_HOVER_COL : -5000269, BUTTON_PRESSED_COL : -5131855, TEXT_COL : -6710887, LABEL_COL : -5592406, SEPARATOR_COL : -6710887, HIGHLIGHT_COL : -14656100, CONTEXT_COL : -5592406, PANEL_BG_COL : -5592406, FONT_SIZE : 26, ELEMENT_W : 200, ELEMENT_H : 48, ELEMENT_OFFSET : 8, ARROW_SIZE : 10, BUTTON_H : 44, CHECK_SIZE : 30, CHECK_SELECT_SIZE : 16, SCROLL_W : 12, TEXT_OFFSET : 16, TAB_W : 24, FILL_WINDOW_BG : false, FILL_BUTTON_BG : true, FILL_ACCENT_BG : false, LINK_STYLE : 0, FULL_TABS : false};
 haxe_Unserializer.DEFAULT_RESOLVER = new haxe__$Unserializer_DefaultResolver();
 haxe_Unserializer.BASE64 = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789%:";
 haxe_io_FPHelper.helper = new DataView(new ArrayBuffer(8));
@@ -32654,15 +32579,6 @@ kha_netsync_Session.RPC_SERVER = 0;
 kha_netsync_Session.RPC_ALL = 1;
 kha_netsync_SyncBuilder.nextId = 0;
 kha_netsync_SyncBuilder.objects = [];
-zui_Canvas.assetMap = new haxe_ds_IntMap();
-zui_Canvas.themes = [];
-zui_Canvas.events = [];
-zui_Canvas.screenW = -1;
-zui_Canvas.screenH = -1;
-zui_Canvas.locale = "en";
-zui_Canvas.h = new zui_Handle();
-zui_Canvas.elemId = -1;
-zui_Canvas.assetId = -1;
 zui_Ext.dataPath = "";
 zui_Ext.lastPath = "";
 zui_Ext._ELEMENT_OFFSET = 0;
@@ -32678,16 +32594,7 @@ zui_Ext.Kz = 0.66666666666666663;
 zui_Ext.Kw = -1.0;
 zui_Ext.e = 1.0e-10;
 zui_Id.i = 0;
-zui_Popup.show = false;
-zui_Popup.hwnd = new zui_Handle();
-zui_Popup.boxTitle = "";
-zui_Popup.boxText = "";
-zui_Popup.modalX = 0;
-zui_Popup.modalY = 0;
-zui_Popup.modalW = 400;
-zui_Popup.modalH = 160;
-zui_Themes.dark = { NAME : "Default Dark", WINDOW_BG_COL : -13421773, WINDOW_TINT_COL : -1, ACCENT_COL : -12303292, ACCENT_HOVER_COL : -11974327, ACCENT_SELECT_COL : -10461088, BUTTON_COL : -12171706, BUTTON_TEXT_COL : -1513499, BUTTON_HOVER_COL : -11974327, BUTTON_PRESSED_COL : -15000805, TEXT_COL : -1513499, LABEL_COL : -3618616, SEPARATOR_COL : -14211289, HIGHLIGHT_COL : -14656100, CONTEXT_COL : -14540254, PANEL_BG_COL : -12895429, FONT_SIZE : 13, ELEMENT_W : 100, ELEMENT_H : 24, ELEMENT_OFFSET : 4, ARROW_SIZE : 5, BUTTON_H : 22, CHECK_SIZE : 15, CHECK_SELECT_SIZE : 8, SCROLL_W : 6, TEXT_OFFSET : 8, TAB_W : 6, FILL_WINDOW_BG : false, FILL_BUTTON_BG : true, FILL_ACCENT_BG : false, LINK_STYLE : 0};
-zui_Themes.light = { NAME : "Default Light", WINDOW_BG_COL : -1052689, WINDOW_TINT_COL : -14540254, ACCENT_COL : -1118482, ACCENT_HOVER_COL : -4473925, ACCENT_SELECT_COL : -5592406, BUTTON_COL : -3355444, BUTTON_TEXT_COL : -14540254, BUTTON_HOVER_COL : -5000269, BUTTON_PRESSED_COL : -5131855, TEXT_COL : -6710887, LABEL_COL : -5592406, SEPARATOR_COL : -6710887, HIGHLIGHT_COL : -14656100, CONTEXT_COL : -5592406, PANEL_BG_COL : -5592406, FONT_SIZE : 26, ELEMENT_W : 200, ELEMENT_H : 48, ELEMENT_OFFSET : 8, ARROW_SIZE : 10, BUTTON_H : 44, CHECK_SIZE : 30, CHECK_SELECT_SIZE : 16, SCROLL_W : 12, TEXT_OFFSET : 16, TAB_W : 24, FILL_WINDOW_BG : false, FILL_BUTTON_BG : true, FILL_ACCENT_BG : false, LINK_STYLE : 0};
+zui_Themes.dark = { NAME : "Default Dark", WINDOW_BG_COL : -13421773, WINDOW_TINT_COL : -1, ACCENT_COL : -12303292, ACCENT_HOVER_COL : -11974327, ACCENT_SELECT_COL : -10461088, BUTTON_COL : -12171706, BUTTON_TEXT_COL : -1513499, BUTTON_HOVER_COL : -11974327, BUTTON_PRESSED_COL : -15000805, TEXT_COL : -1513499, LABEL_COL : -3618616, SEPARATOR_COL : -14211289, HIGHLIGHT_COL : -14656100, CONTEXT_COL : -14540254, PANEL_BG_COL : -12895429, FONT_SIZE : 13, ELEMENT_W : 100, ELEMENT_H : 24, ELEMENT_OFFSET : 4, ARROW_SIZE : 5, BUTTON_H : 22, CHECK_SIZE : 15, CHECK_SELECT_SIZE : 8, SCROLL_W : 6, TEXT_OFFSET : 8, TAB_W : 6, FILL_WINDOW_BG : false, FILL_BUTTON_BG : true, FILL_ACCENT_BG : false, LINK_STYLE : 0, FULL_TABS : false};
 zui_Zui.alwaysRedrawWindow = true;
 zui_Zui.keyRepeat = true;
 zui_Zui.dynamicGlyphLoad = true;
