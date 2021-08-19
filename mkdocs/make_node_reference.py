@@ -9,12 +9,13 @@ USAGE:
 
     path/to/blender.exe -b -P make_node_reference.py"
 
-    This will create a "reference.md" file in the folder of this script
-    from which you can copy the content into the logic node reference
-    article. DO NOT commit that file to the armory_tools repo!
+    This will create markdown files containing the reference in the
+    `/output` folder relative to this script. You can copy the content
+    from those files into the logic node reference articles. DO NOT
+    commit the generated files to the armory_tools repo!
 
     Todo: Create a GitHub action to automatically update the reference
-    upon logic node changes.
+    for each release.
 
     (1) https://github.com/armory3d/armory_wiki_images/blob/master/logic_nodes/make_screenshots.py
         Please also read the usage notes in that file!
@@ -36,12 +37,20 @@ ensurepip.bootstrap()
 os.environ.pop("PIP_REQ_TRACKER", None)
 subprocess.check_output([sys.executable, '-m', 'pip', 'install', '--upgrade', 'markdownmaker'])
 
+# If pip wants an update, toggle this flag before execution
+UPDATE_PIP = False
+if UPDATE_PIP:
+    subprocess.check_output([sys.executable, '-m', 'pip', 'install', '--upgrade', 'pip'])
+
 from markdownmaker.document import Document
 from markdownmaker.markdownmaker import *
 
 PY_NODE_DIR = "https://github.com/armory3d/armory/blob/master/blender/arm/logicnode/"
 HX_NODE_DIR = "https://github.com/armory3d/armory/blob/master/Sources/armory/logicnode/"
 IMG_DIR = "https://github.com/armory3d/armory_wiki_images/raw/master/logic_nodes/"
+
+OUTPUT_DIR = os.path.abspath(__file__)
+OUTPUT_DIR = os.path.join(os.path.dirname(OUTPUT_DIR), "output")
 
 
 def get_anchor(text: str) -> str:
@@ -83,11 +92,11 @@ def format_desc(description_text: str):
     return " ".join(lines)
 
 
-def generate_node_documentation(nodeitem: NodeItem, category: arm_nodes.ArmNodeCategory):
+def generate_node_documentation(doc: Document, nodeitem: NodeItem, category: arm_nodes.ArmNodeCategory):
     nodetype = get_nodetype(nodeitem.nodetype)
-    doc: str = nodetype.__doc__
-    if doc is not None:
-        doc_parts = doc.split("@")
+    docstring: str = nodetype.__doc__
+    if docstring is not None:
+        doc_parts = docstring.split("@")
 
         # Show docstring until the first "@"
         node_description = doc_parts[0].rstrip("\n")
@@ -95,8 +104,8 @@ def generate_node_documentation(nodeitem: NodeItem, category: arm_nodes.ArmNodeC
         node_description = " ".join(node_description.split()).replace("\n", "")
 
         deprecation_note = Optional()
-        Document.add(deprecation_note)
-        Document.add(Paragraph(node_description))
+        doc.add(deprecation_note)
+        doc.add(Paragraph(node_description))
 
         has_see = False
         has_inputs = False
@@ -111,8 +120,8 @@ def generate_node_documentation(nodeitem: NodeItem, category: arm_nodes.ArmNodeC
             if part.startswith("seeNode "):
                 if not has_see:
                     has_see = True
-                    Document.add(Paragraph(Bold("See also:")))
-                    Document.add(UnorderedList(see_list))
+                    doc.add(Paragraph(Bold("See also:")))
+                    doc.add(UnorderedList(see_list))
 
                 see_list.append(Italic(make_node_link(part[8:].rstrip())))
 
@@ -120,22 +129,22 @@ def generate_node_documentation(nodeitem: NodeItem, category: arm_nodes.ArmNodeC
             elif part.startswith("see "):
                 if not has_see:
                     has_see = True
-                    Document.add(Paragraph(Bold("See also:")))
-                    Document.add(UnorderedList(see_list))
+                    doc.add(Paragraph(Bold("See also:")))
+                    doc.add(UnorderedList(see_list))
 
                 see_list.append(Italic(part[4:].rstrip()))
 
         # Add node screenshot
         image_file = IMG_DIR + category.name.lower() + "/" + nodeitem.nodetype + ".jpg"
-        Document.add(Image(url=image_file, alt_text=nodeitem.label + " node"))
+        doc.add(Image(url=image_file, alt_text=nodeitem.label + " node"))
 
         for part in doc_parts:
             # Input sockets
             if part.startswith("input "):
                 if not has_inputs:
                     has_inputs = True
-                    Document.add(Paragraph(Bold("Inputs:")))
-                    Document.add(UnorderedList(input_list))
+                    doc.add(Paragraph(Bold("Inputs:")))
+                    doc.add(UnorderedList(input_list))
 
                 socket_name, description = part[6:].split(":", 1)
                 description = format_desc(description)
@@ -145,8 +154,8 @@ def generate_node_documentation(nodeitem: NodeItem, category: arm_nodes.ArmNodeC
             elif part.startswith("output "):
                 if not has_outputs:
                     has_outputs = True
-                    Document.add(Paragraph(Bold("Outputs:")))
-                    Document.add(UnorderedList(output_list))
+                    doc.add(Paragraph(Bold("Outputs:")))
+                    doc.add(UnorderedList(output_list))
 
                 socket_name, description = part[7:].split(":", 1)
                 description = format_desc(description)
@@ -156,8 +165,8 @@ def generate_node_documentation(nodeitem: NodeItem, category: arm_nodes.ArmNodeC
             elif part.startswith("option "):
                 if not has_options:
                     has_options = True
-                    Document.add(Paragraph(Bold("Options:")))
-                    Document.add(UnorderedList(option_list))
+                    doc.add(Paragraph(Bold("Options:")))
+                    doc.add(UnorderedList(option_list))
 
                 option_name, description = part[7:].split(":", 1)
                 description = format_desc(description)
@@ -189,59 +198,81 @@ def generate_node_documentation(nodeitem: NodeItem, category: arm_nodes.ArmNodeC
         pylink = Link(label="Python", url=PY_NODE_DIR + node_file_py)
         hxlink = Link(label="Haxe", url=HX_NODE_DIR + node_file_hx)
 
-        Document.add(Paragraph(f"{Bold('Sources:')} {pylink} | {hxlink}"))
+        doc.add(Paragraph(f"{Bold('Sources:')} {pylink} | {hxlink}"))
+
+
+def build_page(section_name: str = ""):
+    is_mainpage = section_name == ""
+
+    doc = Document()
+
+    doc.add(Header("Logic Nodes Reference" + ("" if is_mainpage else f": {Italic(section_name.capitalize())} nodes")))
+
+    doc.add(Paragraph(Italic(
+        "This reference was generated automatically. Please do not edit the"
+        " page directly, instead change the docstrings of the nodes in their"
+        f" {Link(label='Python files', url='https://github.com/armory3d/armory/tree/master/blender/arm/logicnode')}"
+        f" or the {Link(label='generator script', url='https://github.com/armory3d/armory_tools/blob/master/make_node_reference.py')}"
+        f" and {Link(label='open a pull request', url='https://github.com/armory3d/armory/wiki/contribute#creating-a-pull-request')}."
+        " Thank you for contributing!")))
+    doc.add(Paragraph(Italic(f"This reference was built for {Bold(f'Armory {arm.props.arm_version}')}.")))
+
+    doc.add(HorizontalRule())
+
+    with HeaderSubLevel(doc):
+
+        # Table of contents
+        doc.add(Header("Node Categories"))
+
+        category_items: List[Node] = []
+        for section, section_categories in arm_nodes.category_items.items():
+            # Ignore empty sections ("default" e.g)
+            if len(section_categories) > 0:
+                section_title = Bold(section.capitalize())
+                if section_name == section:
+                    # Highlight current page
+                    section_title = Italic(section_title)
+                category_items.append(section_title)
+                url = "" if is_mainpage else f"https://github.com/armory3d/armory/wiki/reference_{section}"
+                category_items.append(UnorderedList([Link(c.name, url + get_anchor(c.name)) for c in section_categories]))
+
+        doc.add(UnorderedList(category_items))
+
+        # Page content
+        if not is_mainpage:
+            for category in arm_nodes.category_items[section_name]:
+                doc.add(Header(category.name))
+
+                if category.description != "":
+                    doc.add(Paragraph(category.description))
+
+                with HeaderSubLevel(doc):
+                    # Sort nodes alphabetically and discard section order
+                    iterator = itertools.chain(category.get_all_nodes(), category.deprecated_nodes)
+                    for nodeitem in sorted(iterator, key=lambda n: n.label):
+                        doc.add(Header(nodeitem.label))
+
+                        generate_node_documentation(doc, nodeitem, category)
+
+    filename = "reference.md" if is_mainpage else f"reference_{section_name}.md"
+    with open(os.path.join(OUTPUT_DIR, filename), "w") as out_file:
+        out_file.write(doc.write())
 
 
 def run():
     print("Generating documentation...")
 
-    Document.add(Header("Logic Nodes Reference"))
+    if not os.path.exists(OUTPUT_DIR):
+        os.mkdir(OUTPUT_DIR)
 
-    Document.add(Paragraph(Italic(
-        "This document was generated automatically. Please do not edit this"
-        " page directly, instead change the docstrings of the nodes in their"
-        f" {Link(label='Python files', url='https://github.com/armory3d/armory/tree/master/blender/arm/logicnode')}"
-        f" or the {Link(label='generator script', url='https://github.com/armory3d/armory_tools/blob/master/make_node_reference.py')}"
-        f" and {Link(label='open a pull request', url='https://github.com/armory3d/armory/wiki/contribute#creating-a-pull-request')}."
-        " Thank you for contributing to this reference!")))
+    # Main page
+    build_page()
 
-    Document.add(Paragraph(Italic(f"This reference was built for {Bold(f'Armory {arm.props.arm_version}')}.")))
-
-    Document.add(HorizontalRule())
-
-    with HeaderSubLevel():
-        Document.add(Header("Node Categories"))
-
-        category_items: List[Node] = []
-
-        for section, section_categories in arm_nodes.category_items.items():
-            # Ignore empty sections ("default" e.g)
-            if len(section_categories) > 0:
-                category_items.append(Bold(section.capitalize()))
-                category_items.append(UnorderedList([Link(c.name, get_anchor(c.name)) for c in section_categories]))
-
-        Document.add(UnorderedList(category_items))
-
-        for category in arm_nodes.get_all_categories():
-            Document.add(Header(category.name))
-
-            if category.description != "":
-                Document.add(Paragraph(category.description))
-
-            with HeaderSubLevel():
-                # Sort nodes alphabetically and discard section order
-                iterator = itertools.chain(category.get_all_nodes(), category.deprecated_nodes)
-                for nodeitem in sorted(iterator, key=lambda n: n.label):
-                    Document.add(Header(nodeitem.label))
-
-                    generate_node_documentation(nodeitem, category)
-
-    output_path = os.path.abspath(__file__)
-    output_path = os.path.dirname(output_path)
-    output_path = os.path.join(output_path, "reference.md")
-
-    with open(output_path, "w") as out_file:
-        out_file.write(Document.write())
+    # Section sub-pages
+    for section_name in arm_nodes.category_items.keys():
+        if section_name == 'default':
+            continue
+        build_page(section_name)
 
 
 if __name__ == "__main__":
