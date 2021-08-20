@@ -233,7 +233,7 @@ def build_page(section_name: str = ""):
                     # Highlight current page
                     section_title = Italic(section_title)
                 category_items.append(section_title)
-                url = "" if is_mainpage else f"https://github.com/armory3d/armory/wiki/reference_{section}"
+                url = f"https://github.com/armory3d/armory/wiki/reference_{section}"
                 category_items.append(UnorderedList([Link(c.name, url + get_anchor(c.name)) for c in section_categories]))
 
         doc.add(UnorderedList(category_items))
