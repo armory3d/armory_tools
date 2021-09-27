@@ -1,10 +1,9 @@
 {
   "name": "uglify-js",
   "description": "JavaScript parser, mangler/compressor and beautifier toolkit",
-  "homepage": "http://lisperator.net/uglifyjs",
   "author": "Mihai Bazon <mihai.bazon@gmail.com> (http://lisperator.net/)",
   "license": "BSD-2-Clause",
-  "version": "3.3.12",
+  "version": "3.14.2",
   "engines": {
     "node": ">=0.8.0"
   },
@@ -12,7 +11,7 @@
     "Alex Lam <alexlamsl@gmail.com>",
     "Mihai Bazon <mihai.bazon@gmail.com> (http://lisperator.net/)"
   ],
-  "repository": "mishoo/UglifyJS2",
+  "repository": "mishoo/UglifyJS",
   "main": "tools/node.js",
   "bin": {
     "uglifyjs": "bin/uglifyjs"
@@ -23,17 +22,35 @@
     "tools",
     "LICENSE"
   ],
-  "dependencies": {
-    "commander": "~2.14.1",
-    "source-map": "~0.6.1"
-  },
   "devDependencies": {
-    "acorn": "~7.1.1",
-    "mocha": "~3.5.1",
-    "semver": "~5.5.0"
+    "acorn": "~8.2.1",
+    "semver": "~6.3.0"
   },
   "scripts": {
-    "test": "node test/run-tests.js"
+    "test": "node test/compress.js && node test/mocha.js"
   },
-  "keywords": ["uglify", "uglify-js", "minify", "minifier", "es5"]
+  "keywords": [
+    "cli",
+    "compress",
+    "compressor",
+    "ecma",
+    "ecmascript",
+    "es",
+    "es5",
+    "javascript",
+    "js",
+    "jsmin",
+    "min",
+    "minification",
+    "minifier",
+    "minify",
+    "optimize",
+    "optimizer",
+    "pack",
+    "packer",
+    "parse",
+    "parser",
+    "uglifier",
+    "uglify"
+  ]
 }
