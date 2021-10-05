@@ -41,12 +41,12 @@ def run():
     bmesh.ops.triangulate(bm, faces=bm.faces[:], quad_method="FIXED")
 
     indices = []
-    pos = []
-    nor = []
+    positions = []
+    normals = []
 
     # Fill index buffer
     for face in bm.faces:
-        # Turn the normals inside
+        # Turn the normals inside for correct winding order of indices
         face.normal_flip()
 
         for vert in face.verts:
@@ -54,11 +54,14 @@ def run():
 
     # Vertex buffer data
     for vert in bm.verts:
-        pos.extend(vert.co)
-        nor.extend(vert.normal)
+        positions.extend(vert.co)
+        # Blender world normals have mirrored coords compared to spheres
+        nor = vert.normal
+        nor.negate()
+        normals.extend(nor)
 
-    pos_rounded = [round(elem, 5) for elem in pos]
-    nor_rounded = [round(elem, 5) for elem in nor]
+    pos_rounded = [round(elem, 5) for elem in positions]
+    nor_rounded = [round(elem, 5) for elem in normals]
 
     bm.free()
 
