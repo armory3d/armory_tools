@@ -68,28 +68,41 @@ def get_nodetype(typename: str):
     return bpy.types.bpy_struct.bl_rna_get_subclass_py(typename)
 
 
-def format_desc(description_text: str):
+def format_desc(description_text: str, *, indented=False) -> str:
     """Format the raw description string."""
-    # Remove spaces, tabs and carriage returns left/right of each line
-    lines = [l.strip(" \t\r") for l in description_text.split("\n")]
+    out = ""
 
-    # Replace empty lines with \n
-    lines = list(map(lambda l: l.replace("", "\n") if l == "" else l, lines))
+    # Indentation for list items is 2 spaces per markdown standard in
+    # this case. For now, sub-lists are indented one level only, more
+    # is not required currently
+    line_start = "  " if indented else ""
 
-    # Remove empty lines from the end of the list
-    for idx, line in enumerate(reversed(lines)):
-        if line != "\n":
-            # [:0] would empty the list, instead ignore it
-            if idx != 0:
-                lines = lines[0:-idx]
-            break  # We reached the actual content
+    # Whether the last line was empty (ignore multiple empty lines)
+    last_empty = False
 
-    # Indent sub-lists (one level only, more is not required right now)
-    # Indentation is 2 spaces per markdown standard in this case, one
-    # is added by " ".join() later
-    lines = [(" " + line if line.startswith("- ") else line) for line in lines]
+    for line in description_text.splitlines():
+        line = line.strip()
 
-    return " ".join(lines)
+        # List item. Explicitly check for space after "-", might be a negative number else
+        if line.startswith("- "):
+            out += "\n" + line_start + line
+            last_empty = False
+
+        elif line == "":
+            if last_empty:
+                continue
+            out += "\n"
+            last_empty = True
+
+        else:
+            if last_empty:
+                out += "\n" + line_start + line  # Create a full empty line above the start of a paragraph
+            else:
+                out += " " + line  # Combine one paragraph to a single line
+            last_empty = False
+
+    # Remove any left-over whitespace at the beginning/end
+    return out.strip()
 
 
 def generate_node_documentation(doc: Document, nodeitem: NodeItem, category: arm_nodes.ArmNodeCategory):
@@ -100,8 +113,7 @@ def generate_node_documentation(doc: Document, nodeitem: NodeItem, category: arm
 
         # Show docstring until the first "@"
         node_description = doc_parts[0].rstrip("\n")
-        # Remove trailing whitespace and ignore newlines
-        node_description = " ".join(node_description.split()).replace("\n", "")
+        node_description = format_desc(node_description)
 
         deprecation_note = Optional()
         doc.add(deprecation_note)
@@ -147,7 +159,7 @@ def generate_node_documentation(doc: Document, nodeitem: NodeItem, category: arm
                     doc.add(UnorderedList(input_list))
 
                 socket_name, description = part[6:].split(":", 1)
-                description = format_desc(description)
+                description = format_desc(description, indented=True)
                 input_list.append(f"{InlineCode(socket_name)}: {description}")
 
             # Output sockets
@@ -158,7 +170,7 @@ def generate_node_documentation(doc: Document, nodeitem: NodeItem, category: arm
                     doc.add(UnorderedList(output_list))
 
                 socket_name, description = part[7:].split(":", 1)
-                description = format_desc(description)
+                description = format_desc(description, indented=True)
                 output_list.append(f"{InlineCode(socket_name)}: {description}")
 
             # Other UI options
@@ -169,7 +181,7 @@ def generate_node_documentation(doc: Document, nodeitem: NodeItem, category: arm
                     doc.add(UnorderedList(option_list))
 
                 option_name, description = part[7:].split(":", 1)
-                description = format_desc(description)
+                description = format_desc(description, indented=True)
                 option_list.append(f"{InlineCode(option_name)}: {description}")
 
             elif part.startswith("deprecated "):
