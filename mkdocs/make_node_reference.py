@@ -223,8 +223,8 @@ def build_page(section_name: str = ""):
     doc.add(Paragraph(Italic(
         "This reference was generated automatically. Please do not edit the"
         " page directly, instead change the docstrings of the nodes in their"
-        f" {Link(label='Python files', url='https://github.com/armory3d/armory/tree/master/blender/arm/logicnode')}"
-        f" or the {Link(label='generator script', url='https://github.com/armory3d/armory_tools/blob/master/make_node_reference.py')}"
+        f" {Link(label='Python files', url='https://github.com/armory3d/armory/tree/main/blender/arm/logicnode')}"
+        f" or the {Link(label='generator script', url='https://github.com/armory3d/armory_tools/blob/main/mkdocs/make_node_reference.py')}"
         f" and {Link(label='open a pull request', url='https://github.com/armory3d/armory/wiki/contribute#creating-a-pull-request')}."
         " Thank you for contributing!")))
     doc.add(Paragraph(Italic(f"This reference was built for {Bold(f'Armory {arm.props.arm_version}')}.")))
