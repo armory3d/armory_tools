@@ -107,12 +107,11 @@ Main.initialized = function($window) {
 	if(Main.cwd != "") {
 		var path = kha_System.get_systemId() == "Windows" ? StringTools.replace(Main.prefs.path,"/","\\") : Main.prefs.path;
 		kha_Assets.loadBlobFromPath(path,function(cblob) {
-			var raw = JSON.parse(cblob.toString());
-			Main.inst = new arm2d_Editor(raw);
+			Main.inst = new arm2d_Editor(armory_ui_Canvas.parseCanvasFromBlob(cblob));
 		},null,{ fileName : "Main.hx", lineNumber : 58, className : "Main", methodName : "initialized"});
 	} else {
 		Main.prefs.path = Krom.getFilesLocation();
-		var raw = { name : "untitled", x : 0, y : 0, width : 1280, height : 720, theme : "Default Light", elements : [], assets : []};
+		var raw = { name : "untitled", x : 0, y : 0, width : 1280, height : 720, theme : "Default Light", visible : true, elements : [], assets : []};
 		Main.inst = new arm2d_Editor(raw);
 	}
 };
@@ -389,8 +388,7 @@ arm2d_Assets.save = function(canvas) {
 };
 arm2d_Assets.load = function(done) {
 	kha_Assets.loadBlobFromPath(Main.prefs.path,function(b) {
-		var canvas = JSON.parse(b.toString());
-		done(canvas);
+		done(armory_ui_Canvas.parseCanvasFromBlob(b));
 	},null,{ fileName : "arm2d/Assets.hx", lineNumber : 96, className : "arm2d.Assets", methodName : "load"});
 };
 arm2d_Assets.saveCanvas = function(canvas) {
@@ -2416,11 +2414,15 @@ var armory_ui_Canvas = function() { };
 $hxClasses["armory.ui.Canvas"] = armory_ui_Canvas;
 armory_ui_Canvas.__name__ = true;
 armory_ui_Canvas.draw = function(ui,canvas,g) {
+	armory_ui_Canvas.events.length = 0;
+	if(!canvas.visible) {
+		return armory_ui_Canvas.events;
+	}
 	armory_ui_Canvas.screenW = kha_System.windowWidth();
 	armory_ui_Canvas.screenH = kha_System.windowHeight();
-	armory_ui_Canvas.events.length = 0;
 	armory_ui_Canvas._ui = ui;
 	g.end();
+	g.set_imageScaleQuality(armory_ui_Canvas.imageScaleQuality);
 	ui.begin(g);
 	g.begin(false);
 	ui.g = g;
@@ -2689,7 +2691,7 @@ armory_ui_Canvas.drawElement = function(ui,canvas,element,px,py) {
 		var color = element.color;
 		var defaultColor = armory_ui_Canvas.getTheme(canvas.theme).BUTTON_COL;
 		ui1.set_color(color != null ? color : defaultColor);
-		kha_graphics2_GraphicsExtension.fillCircle(ui.g,ui._x + (element.width * armory_ui_Canvas._ui.ops.scaleFactor | 0) / 2,ui._y + (element.height * armory_ui_Canvas._ui.ops.scaleFactor | 0) / 2,ui._w / 2);
+		zui_GraphicsExtension.fillCircle(ui.g,ui._x + (element.width * armory_ui_Canvas._ui.ops.scaleFactor | 0) / 2,ui._y + (element.height * armory_ui_Canvas._ui.ops.scaleFactor | 0) / 2,ui._w / 2);
 		ui.g.set_color(col);
 		break;
 	case 15:
@@ -2698,7 +2700,7 @@ armory_ui_Canvas.drawElement = function(ui,canvas,element,px,py) {
 		var color = element.color;
 		var defaultColor = armory_ui_Canvas.getTheme(canvas.theme).BUTTON_COL;
 		ui1.set_color(color != null ? color : defaultColor);
-		kha_graphics2_GraphicsExtension.drawCircle(ui.g,ui._x + (element.width * armory_ui_Canvas._ui.ops.scaleFactor | 0) / 2,ui._y + (element.height * armory_ui_Canvas._ui.ops.scaleFactor | 0) / 2,ui._w / 2,element.strength);
+		zui_GraphicsExtension.drawCircle(ui.g,ui._x + (element.width * armory_ui_Canvas._ui.ops.scaleFactor | 0) / 2,ui._y + (element.height * armory_ui_Canvas._ui.ops.scaleFactor | 0) / 2,ui._w / 2,element.strength);
 		ui.g.set_color(col);
 		break;
 	case 16:
@@ -2745,12 +2747,12 @@ armory_ui_Canvas.drawElement = function(ui,canvas,element,px,py) {
 		var color = element.color_progress;
 		var defaultColor = armory_ui_Canvas.getTheme(canvas.theme).TEXT_COL;
 		ui1.set_color(color != null ? color : defaultColor);
-		kha_graphics2_GraphicsExtension.drawArc(ui.g,ui._x + (element.width * armory_ui_Canvas._ui.ops.scaleFactor | 0) / 2,ui._y + (element.height * armory_ui_Canvas._ui.ops.scaleFactor | 0) / 2,ui._w / 2,-Math.PI / 2,Math.PI * 2 / totalprogress * progress - Math.PI / 2,element.strength);
+		zui_GraphicsExtension.drawArc(ui.g,ui._x + (element.width * armory_ui_Canvas._ui.ops.scaleFactor | 0) / 2,ui._y + (element.height * armory_ui_Canvas._ui.ops.scaleFactor | 0) / 2,ui._w / 2,-Math.PI / 2,Math.PI * 2 / totalprogress * progress - Math.PI / 2,element.strength);
 		var ui1 = ui.g;
 		var color = element.color;
 		var defaultColor = armory_ui_Canvas.getTheme(canvas.theme).BUTTON_COL;
 		ui1.set_color(color != null ? color : defaultColor);
-		kha_graphics2_GraphicsExtension.fillCircle(ui.g,ui._x + (element.width * armory_ui_Canvas._ui.ops.scaleFactor | 0) / 2,ui._y + (element.height * armory_ui_Canvas._ui.ops.scaleFactor | 0) / 2,ui._w / 2 - 10);
+		zui_GraphicsExtension.fillCircle(ui.g,ui._x + (element.width * armory_ui_Canvas._ui.ops.scaleFactor | 0) / 2,ui._y + (element.height * armory_ui_Canvas._ui.ops.scaleFactor | 0) / 2,ui._w / 2 - 10);
 		ui.g.set_color(col);
 		break;
 	case 20:
@@ -2797,6 +2799,13 @@ armory_ui_Canvas.drawElement = function(ui,canvas,element,px,py) {
 	if(rotated) {
 		ui.g.popTransformation();
 	}
+};
+armory_ui_Canvas.parseCanvasFromBlob = function(blob) {
+	var raw = JSON.parse(blob.toString());
+	if(!Object.prototype.hasOwnProperty.call(raw,"visible")) {
+		raw["visible"] = true;
+	}
+	return raw;
 };
 armory_ui_Canvas.getText = function(canvas,e) {
 	return e.text;
@@ -5097,7 +5106,7 @@ kha__$Assets_ImageList.prototype = {
 	,black_white_gradientLoad: function(done,failure) {
 		kha_Assets.loadImage("black_white_gradient",function(image) {
 			done();
-		},failure,{ fileName : "kha/internal/AssetsBuilder.hx", lineNumber : 143, className : "kha._Assets.ImageList", methodName : "black_white_gradientLoad"});
+		},failure,{ fileName : "kha/internal/AssetsBuilder.hx", lineNumber : 142, className : "kha._Assets.ImageList", methodName : "black_white_gradientLoad"});
 	}
 	,black_white_gradientUnload: function() {
 		this.black_white_gradient.unload();
@@ -5110,7 +5119,7 @@ kha__$Assets_ImageList.prototype = {
 	,color_wheelLoad: function(done,failure) {
 		kha_Assets.loadImage("color_wheel",function(image) {
 			done();
-		},failure,{ fileName : "kha/internal/AssetsBuilder.hx", lineNumber : 143, className : "kha._Assets.ImageList", methodName : "color_wheelLoad"});
+		},failure,{ fileName : "kha/internal/AssetsBuilder.hx", lineNumber : 142, className : "kha._Assets.ImageList", methodName : "color_wheelLoad"});
 	}
 	,color_wheelUnload: function() {
 		this.color_wheel.unload();
@@ -5123,7 +5132,7 @@ kha__$Assets_ImageList.prototype = {
 	,iconsLoad: function(done,failure) {
 		kha_Assets.loadImage("icons",function(image) {
 			done();
-		},failure,{ fileName : "kha/internal/AssetsBuilder.hx", lineNumber : 143, className : "kha._Assets.ImageList", methodName : "iconsLoad"});
+		},failure,{ fileName : "kha/internal/AssetsBuilder.hx", lineNumber : 142, className : "kha._Assets.ImageList", methodName : "iconsLoad"});
 	}
 	,iconsUnload: function() {
 		this.icons.unload();
@@ -5176,7 +5185,7 @@ kha__$Assets_FontList.prototype = {
 	,font_defaultLoad: function(done,failure) {
 		kha_Assets.loadFont("font_default",function(font) {
 			done();
-		},failure,{ fileName : "kha/internal/AssetsBuilder.hx", lineNumber : 155, className : "kha._Assets.FontList", methodName : "font_defaultLoad"});
+		},failure,{ fileName : "kha/internal/AssetsBuilder.hx", lineNumber : 154, className : "kha._Assets.FontList", methodName : "font_defaultLoad"});
 	}
 	,font_defaultUnload: function() {
 		this.font_default.unload();
@@ -5446,15 +5455,20 @@ kha_Color.fromFloats = function(r,g,b,a) {
 	return kha_Color._new((a * 255 | 0) << 24 | (r * 255 | 0) << 16 | (g * 255 | 0) << 8 | (b * 255 | 0));
 };
 kha_Color.fromString = function(value) {
-	if((value.length == 7 || value.length == 9) && value.charCodeAt(0) == 35) {
-		var colorValue = Std.parseInt("0x" + HxOverrides.substr(value,1,null));
-		if(value.length == 7) {
-			colorValue += -16777216;
-		}
-		return kha_Color._new(colorValue | 0);
-	} else {
-		throw haxe_Exception.thrown("Invalid Color string: '" + value + "'");
+	if(!(value.length == 4 || value.length == 7 || value.length == 9) || value.charCodeAt(0) != 35) {
+		throw haxe_Exception.thrown("Invalid Color string: " + value);
 	}
+	if(value.length == 4) {
+		var r = value.charAt(1);
+		var g = value.charAt(2);
+		var b = value.charAt(3);
+		value = "#" + r + r + g + g + b + b;
+	}
+	var colorValue = Std.parseInt("0x" + HxOverrides.substr(value,1,null));
+	if(value.length == 7) {
+		colorValue += -16777216;
+	}
+	return kha_Color._new(colorValue | 0);
 };
 kha_Color._new = function(value) {
 	var this1 = value;
@@ -5797,21 +5811,25 @@ kha_Image.getTextureFormat = function(format) {
 kha_Image._fromTexture = function(texture) {
 	return new kha_Image(texture);
 };
-kha_Image.fromBytes = function(bytes,width,height,format,usage) {
+kha_Image.fromBytes = function(bytes,width,height,format,usage,readable) {
+	if(readable == null) {
+		readable = false;
+	}
 	if(format == null) {
 		format = 0;
 	}
-	var readable = true;
 	var image = new kha_Image(null);
 	image.myFormat = format;
 	image.texture_ = Krom.createTextureFromBytes(bytes.b.bufferValue,width,height,kha_Image.getTextureFormat(format),readable);
 	return image;
 };
-kha_Image.fromBytes3D = function(bytes,width,height,depth,format,usage) {
+kha_Image.fromBytes3D = function(bytes,width,height,depth,format,usage,readable) {
+	if(readable == null) {
+		readable = false;
+	}
 	if(format == null) {
 		format = 0;
 	}
-	var readable = true;
 	var image = new kha_Image(null);
 	image.myFormat = format;
 	image.texture_ = Krom.createTextureFromBytes3D(bytes.b.bufferValue,width,height,depth,kha_Image.getTextureFormat(format),readable);
@@ -5825,7 +5843,10 @@ kha_Image.fromEncodedBytes = function(bytes,format,doneCallback,errorCallback,re
 	image.texture_ = Krom.createTextureFromEncodedBytes(bytes.b.bufferValue,format,readable);
 	doneCallback(image);
 };
-kha_Image.create = function(width,height,format,usage) {
+kha_Image.create = function(width,height,format,usage,readable) {
+	if(readable == null) {
+		readable = false;
+	}
 	if(format == null) {
 		format = 0;
 	}
@@ -5834,7 +5855,10 @@ kha_Image.create = function(width,height,format,usage) {
 	image.texture_ = Krom.createTexture(width,height,kha_Image.getTextureFormat(format));
 	return image;
 };
-kha_Image.create3D = function(width,height,depth,format,usage) {
+kha_Image.create3D = function(width,height,depth,format,usage,readable) {
+	if(readable == null) {
+		readable = false;
+	}
 	if(format == null) {
 		format = 0;
 	}
@@ -6248,26 +6272,45 @@ kha_LoaderImpl.getImageFormats = function() {
 };
 kha_LoaderImpl.loadImageFromDescription = function(desc,done,failed) {
 	var readable = Object.prototype.hasOwnProperty.call(desc,"readable") && desc.readable;
-	done(kha_Image._fromTexture(Krom.loadImage(desc.files[0],readable)));
+	var texture = Krom.loadImage(desc.files[0],readable);
+	if(texture == null) {
+		failed({ url : desc.files.join(","), error : "Could not load image(s)"});
+	} else {
+		done(kha_Image._fromTexture(texture));
+	}
 };
 kha_LoaderImpl.getSoundFormats = function() {
 	return ["wav","ogg"];
 };
 kha_LoaderImpl.loadSoundFromDescription = function(desc,done,failed) {
-	done(new kha_krom_Sound(haxe_io_Bytes.ofData(Krom.loadSound(desc.files[0]))));
+	var sound = Krom.loadSound(desc.files[0]);
+	if(sound == null) {
+		failed({ url : desc.files.join(","), error : "Could not load sound(s)"});
+	} else {
+		done(new kha_krom_Sound(haxe_io_Bytes.ofData(sound)));
+	}
 };
 kha_LoaderImpl.getVideoFormats = function() {
 	return ["webm"];
 };
 kha_LoaderImpl.loadVideoFromDescription = function(desc,done,failed) {
+	failed({ url : desc.files.join(","), error : "Could not load video(s), Krom currently does not support loading videos"});
 };
 kha_LoaderImpl.loadBlobFromDescription = function(desc,done,failed) {
-	done(new kha_internal_BytesBlob(haxe_io_Bytes.ofData(Krom.loadBlob(desc.files[0]))));
+	var blob = Krom.loadBlob(desc.files[0]);
+	if(blob == null) {
+		failed({ url : desc.files.join(","), error : "Could not load blob(s)"});
+	} else {
+		done(new kha_internal_BytesBlob(haxe_io_Bytes.ofData(blob)));
+	}
 };
 kha_LoaderImpl.loadFontFromDescription = function(desc,done,failed) {
 	kha_LoaderImpl.loadBlobFromDescription(desc,function(blob) {
 		done(new kha_Kravur(blob));
-	},failed);
+	},function(a) {
+		a.error = "Could not load font(s)";
+		failed(a);
+	});
 };
 var kha_TimeTask = function() {
 };
@@ -6725,13 +6768,25 @@ kha_Scheduler.pauseRunningTimeTask = function(timeTask,paused) {
 	}
 };
 kha_Scheduler.pauseTimeTasks = function(groupId,paused) {
-	var _g = 0;
-	var _g1 = kha_Scheduler.timeTasks;
-	while(_g < _g1.length) {
-		var timeTask = _g1[_g];
-		++_g;
-		if(timeTask.groupId == groupId) {
-			kha_Scheduler.pauseRunningTimeTask(timeTask,paused);
+	if(paused) {
+		var _g = 0;
+		var _g1 = kha_Scheduler.timeTasks;
+		while(_g < _g1.length) {
+			var timeTask = _g1[_g];
+			++_g;
+			if(timeTask.groupId == groupId) {
+				kha_Scheduler.pauseRunningTimeTask(timeTask,paused);
+			}
+		}
+	} else {
+		var _g = 0;
+		var _g1 = kha_Scheduler.pausedTimeTasks;
+		while(_g < _g1.length) {
+			var timeTask = _g1[_g];
+			++_g;
+			if(timeTask.groupId == groupId) {
+				kha_Scheduler.pauseRunningTimeTask(timeTask,paused);
+			}
 		}
 	}
 	if(kha_Scheduler.activeTimeTask != null && kha_Scheduler.activeTimeTask.groupId == groupId) {
@@ -7127,7 +7182,7 @@ kha_System.windowHeight = function($window) {
 	if($window == null) {
 		$window = 0;
 	}
-	return kha_Window.get_all()[$window].get_height();
+	return kha_Window.get($window).get_height();
 };
 kha_System.get_screenRotation = function() {
 	return 0;
@@ -30938,6 +30993,11 @@ zui_Ext.colorWheel = function(ui,handle,alpha,w,h,colorPreview,picker) {
 	}
 	return handle.color;
 };
+zui_Ext.rightAlignNumber = function(number,length) {
+	var s = number + "";
+	while(s.length < length) s = " " + s;
+	return s;
+};
 zui_Ext.textArea = function(ui,handle,align,editable,label,wordWrap) {
 	if(wordWrap == null) {
 		wordWrap = false;
@@ -30958,20 +31018,6 @@ zui_Ext.textArea = function(ui,handle,align,editable,label,wordWrap) {
 	var keyPressed = selected && ui.isKeyPressed;
 	ui.highlightOnSelect = false;
 	ui.tabSwitchEnabled = false;
-	ui.g.set_color(ui.t.SEPARATOR_COL);
-	var g = ui.g;
-	var x = ui._x + ui.buttonOffsetY;
-	var y = ui._y + ui.buttonOffsetY;
-	var w = ui._w - ui.buttonOffsetY * 2;
-	var h = lines.length * (ui.t.ELEMENT_H * ui.ops.scaleFactor) - ui.buttonOffsetY * 2;
-	var strength = 0.0;
-	if(strength == 0.0) {
-		strength = 1;
-	}
-	if(!ui.enabled) {
-		ui.fadeColor();
-	}
-	g.fillRect(x,y - 1,w,h + 1);
 	if(wordWrap && handle.text != "") {
 		var cursorSet = false;
 		var cursorPos = ui.cursorX;
@@ -31014,6 +31060,38 @@ zui_Ext.textArea = function(ui,handle,align,editable,label,wordWrap) {
 		}
 	}
 	var cursorStartX = ui.cursorX;
+	if(zui_Ext.textAreaLineNumbers) {
+		var _y = ui._y;
+		var _TEXT_COL = ui.t.TEXT_COL;
+		ui.t.TEXT_COL = ui.t.ACCENT_COL;
+		var maxLength = Math.ceil(Math.log(lines.length + 0.5) / Math.log(10));
+		var _g = 0;
+		var _g1 = lines.length;
+		while(_g < _g1) {
+			var i = _g++;
+			ui.text(zui_Ext.rightAlignNumber(i + 1,maxLength));
+			ui._y -= ui.t.ELEMENT_OFFSET * ui.ops.scaleFactor;
+		}
+		ui.t.TEXT_COL = _TEXT_COL;
+		ui._y = _y;
+		ui._x += (lines.length + "").length * 16 + 4;
+	}
+	ui.g.set_color(ui.t.SEPARATOR_COL);
+	var g = ui.g;
+	var x = ui._x + ui.buttonOffsetY;
+	var y = ui._y + ui.buttonOffsetY;
+	var w = ui._w - ui.buttonOffsetY * 2;
+	var h = lines.length * (ui.t.ELEMENT_H * ui.ops.scaleFactor) - ui.buttonOffsetY * 2;
+	var strength = 0.0;
+	if(strength == 0.0) {
+		strength = 1;
+	}
+	if(!ui.enabled) {
+		ui.fadeColor();
+	}
+	g.fillRect(x,y - 1,w,h + 1);
+	var _textColoring = ui.textColoring;
+	ui.textColoring = zui_Ext.textAreaColoring;
 	var _g = 0;
 	var _g1 = lines.length;
 	while(_g < _g1) {
@@ -31037,12 +31115,18 @@ zui_Ext.textArea = function(ui,handle,align,editable,label,wordWrap) {
 		ui._y -= ui.t.ELEMENT_OFFSET * ui.ops.scaleFactor;
 	}
 	ui._y += ui.t.ELEMENT_OFFSET * ui.ops.scaleFactor;
+	ui.textColoring = _textColoring;
+	if(zui_Ext.textAreaScrollPastEnd) {
+		ui._y += ui._h - ui.windowHeaderH - ui.t.ELEMENT_H * ui.ops.scaleFactor - ui.t.ELEMENT_OFFSET * ui.ops.scaleFactor;
+	}
 	if(keyPressed) {
 		if(ui.key == 40 && handle.position < lines.length - 1) {
 			handle.position++;
+			zui_Ext.scrollAlign(ui,handle);
 		}
 		if(ui.key == 38 && handle.position > 0) {
 			handle.position--;
+			zui_Ext.scrollAlign(ui,handle);
 		}
 		if(editable && ui.key == 13 && !wordWrap) {
 			handle.position++;
@@ -31050,12 +31134,14 @@ zui_Ext.textArea = function(ui,handle,align,editable,label,wordWrap) {
 			lines[handle.position - 1] = HxOverrides.substr(lines[handle.position - 1],0,ui.cursorX);
 			ui.startTextEdit(handle);
 			ui.cursorX = ui.highlightAnchor = 0;
+			zui_Ext.scrollAlign(ui,handle);
 		}
 		if(editable && ui.key == 8 && cursorStartX == 0 && handle.position > 0) {
 			handle.position--;
 			ui.cursorX = ui.highlightAnchor = lines[handle.position].length;
 			lines[handle.position] += lines[handle.position + 1];
 			lines.splice(handle.position + 1,1);
+			zui_Ext.scrollAlign(ui,handle);
 		}
 		ui.textSelected = lines[handle.position];
 	}
@@ -31063,6 +31149,13 @@ zui_Ext.textArea = function(ui,handle,align,editable,label,wordWrap) {
 	ui.tabSwitchEnabled = true;
 	handle.text = lines.join("\n");
 	return handle.text;
+};
+zui_Ext.scrollAlign = function(ui,handle) {
+	if((handle.position + 1) * (ui.t.ELEMENT_H * ui.ops.scaleFactor) + ui.currentWindow.scrollOffset > ui._h - ui.windowHeaderH) {
+		ui.currentWindow.scrollOffset -= ui.t.ELEMENT_H * ui.ops.scaleFactor;
+	} else if((handle.position + 1) * (ui.t.ELEMENT_H * ui.ops.scaleFactor) + ui.currentWindow.scrollOffset < ui.windowHeaderH) {
+		ui.currentWindow.scrollOffset += ui.t.ELEMENT_H * ui.ops.scaleFactor;
+	}
 };
 zui_Ext.beginMenu = function(ui) {
 	zui_Ext._ELEMENT_OFFSET = ui.t.ELEMENT_OFFSET;
@@ -31137,6 +31230,358 @@ zui_Ext.rgbToHsv = function(cR,cG,cB,out) {
 	out[1] = d / (qx + 1.0e-10);
 	out[2] = qx;
 };
+var zui_GraphicsExtension = function() { };
+$hxClasses["zui.GraphicsExtension"] = zui_GraphicsExtension;
+zui_GraphicsExtension.__name__ = true;
+zui_GraphicsExtension.drawArc = function(g2,cx,cy,radius,sAngle,eAngle,strength,ccw,segments) {
+	if(segments == null) {
+		segments = 0;
+	}
+	if(ccw == null) {
+		ccw = false;
+	}
+	if(strength == null) {
+		strength = 1;
+	}
+	sAngle %= Math.PI * 2;
+	eAngle %= Math.PI * 2;
+	if(ccw) {
+		if(eAngle > sAngle) {
+			eAngle -= Math.PI * 2;
+		}
+	} else if(eAngle < sAngle) {
+		eAngle += Math.PI * 2;
+	}
+	radius += strength / 2;
+	if(segments <= 0) {
+		segments = Math.floor(10 * Math.sqrt(radius));
+	}
+	var theta = (eAngle - sAngle) / segments;
+	var c = Math.cos(theta);
+	var s = Math.sin(theta);
+	var x = Math.cos(sAngle) * radius;
+	var y = Math.sin(sAngle) * radius;
+	var _g = 0;
+	var _g1 = segments;
+	while(_g < _g1) {
+		var n = _g++;
+		var px = x + cx;
+		var py = y + cy;
+		var t = x;
+		x = c * x - s * y;
+		y = c * y + s * t;
+		zui_GraphicsExtension.drawInnerLine(g2,x + cx,y + cy,px,py,strength);
+	}
+};
+zui_GraphicsExtension.fillArc = function(g2,cx,cy,radius,sAngle,eAngle,ccw,segments) {
+	if(segments == null) {
+		segments = 0;
+	}
+	if(ccw == null) {
+		ccw = false;
+	}
+	sAngle %= Math.PI * 2;
+	eAngle %= Math.PI * 2;
+	if(ccw) {
+		if(eAngle > sAngle) {
+			eAngle -= Math.PI * 2;
+		}
+	} else if(eAngle < sAngle) {
+		eAngle += Math.PI * 2;
+	}
+	if(segments <= 0) {
+		segments = Math.floor(10 * Math.sqrt(radius));
+	}
+	var theta = (eAngle - sAngle) / segments;
+	var c = Math.cos(theta);
+	var s = Math.sin(theta);
+	var x = Math.cos(sAngle) * radius;
+	var y = Math.sin(sAngle) * radius;
+	var sx = x + cx;
+	var sy = y + cy;
+	var _g = 0;
+	var _g1 = segments;
+	while(_g < _g1) {
+		var n = _g++;
+		var px = x + cx;
+		var py = y + cy;
+		var t = x;
+		x = c * x - s * y;
+		y = c * y + s * t;
+		g2.fillTriangle(px,py,x + cx,y + cy,sx,sy);
+	}
+};
+zui_GraphicsExtension.drawCircle = function(g2,cx,cy,radius,strength,segments) {
+	if(segments == null) {
+		segments = 0;
+	}
+	if(strength == null) {
+		strength = 1;
+	}
+	radius += strength / 2;
+	if(segments <= 0) {
+		segments = Math.floor(10 * Math.sqrt(radius));
+	}
+	var theta = 2 * Math.PI / segments;
+	var c = Math.cos(theta);
+	var s = Math.sin(theta);
+	var x = radius;
+	var y = 0.0;
+	var _g = 0;
+	var _g1 = segments;
+	while(_g < _g1) {
+		var n = _g++;
+		var px = x + cx;
+		var py = y + cy;
+		var t = x;
+		x = c * x - s * y;
+		y = c * y + s * t;
+		zui_GraphicsExtension.drawInnerLine(g2,x + cx,y + cy,px,py,strength);
+	}
+};
+zui_GraphicsExtension.drawInnerLine = function(g2,x1,y1,x2,y2,strength) {
+	var side = y2 > y1 ? 1 : 0;
+	if(y2 == y1) {
+		side = x2 - x1 > 0 ? 1 : 0;
+	}
+	var vec_x = 0;
+	var vec_y = 0;
+	if(y2 == y1) {
+		var x = 0;
+		var y = -1;
+		if(y == null) {
+			y = 0;
+		}
+		if(x == null) {
+			x = 0;
+		}
+		var v_x = x;
+		var v_y = y;
+		vec_x = v_x;
+		vec_y = v_y;
+	} else {
+		var x = 1;
+		var y = -(x2 - x1) / (y2 - y1);
+		if(y == null) {
+			y = 0;
+		}
+		if(x == null) {
+			x = 0;
+		}
+		var v_x = x;
+		var v_y = y;
+		vec_x = v_x;
+		vec_y = v_y;
+	}
+	var currentLength = Math.sqrt(vec_x * vec_x + vec_y * vec_y);
+	if(currentLength != 0) {
+		var mul = strength / currentLength;
+		vec_x *= mul;
+		vec_y *= mul;
+	}
+	var x = x1 + side * vec_x;
+	var y = y1 + side * vec_y;
+	if(y == null) {
+		y = 0;
+	}
+	if(x == null) {
+		x = 0;
+	}
+	var p1_x = x;
+	var p1_y = y;
+	var x = x2 + side * vec_x;
+	var y = y2 + side * vec_y;
+	if(y == null) {
+		y = 0;
+	}
+	if(x == null) {
+		x = 0;
+	}
+	var p2_x = x;
+	var p2_y = y;
+	var x = p1_x - vec_x;
+	var y = p1_y - vec_y;
+	if(y == null) {
+		y = 0;
+	}
+	if(x == null) {
+		x = 0;
+	}
+	var p3_x = x;
+	var p3_y = y;
+	var x = p2_x - vec_x;
+	var y = p2_y - vec_y;
+	if(y == null) {
+		y = 0;
+	}
+	if(x == null) {
+		x = 0;
+	}
+	var p4_x = x;
+	var p4_y = y;
+	g2.fillTriangle(p1_x,p1_y,p2_x,p2_y,p3_x,p3_y);
+	g2.fillTriangle(p3_x,p3_y,p2_x,p2_y,p4_x,p4_y);
+};
+zui_GraphicsExtension.fillCircle = function(g2,cx,cy,radius,segments) {
+	if(segments == null) {
+		segments = 0;
+	}
+	if(segments <= 0) {
+		segments = Math.floor(10 * Math.sqrt(radius));
+	}
+	var theta = 2 * Math.PI / segments;
+	var c = Math.cos(theta);
+	var s = Math.sin(theta);
+	var x = radius;
+	var y = 0.0;
+	var _g = 0;
+	var _g1 = segments;
+	while(_g < _g1) {
+		var n = _g++;
+		var px = x + cx;
+		var py = y + cy;
+		var t = x;
+		x = c * x - s * y;
+		y = c * y + s * t;
+		g2.fillTriangle(px,py,x + cx,y + cy,cx,cy);
+	}
+};
+zui_GraphicsExtension.drawPolygon = function(g2,x,y,vertices,strength) {
+	if(strength == null) {
+		strength = 1;
+	}
+	var iterator_current = 0;
+	var iterator_array = vertices;
+	var v0 = iterator_array[iterator_current++];
+	var v1 = v0;
+	while(iterator_current < iterator_array.length) {
+		var v2 = iterator_array[iterator_current++];
+		g2.drawLine(v1.x + x,v1.y + y,v2.x + x,v2.y + y,strength);
+		v1 = v2;
+	}
+	g2.drawLine(v1.x + x,v1.y + y,v0.x + x,v0.y + y,strength);
+};
+zui_GraphicsExtension.fillPolygon = function(g2,x,y,vertices) {
+	var iterator_current = 0;
+	var iterator_array = vertices;
+	if(iterator_current >= iterator_array.length) {
+		return;
+	}
+	var v0 = iterator_array[iterator_current++];
+	if(iterator_current >= iterator_array.length) {
+		return;
+	}
+	var v1 = iterator_array[iterator_current++];
+	while(iterator_current < iterator_array.length) {
+		var v2 = iterator_array[iterator_current++];
+		g2.fillTriangle(v0.x + x,v0.y + y,v1.x + x,v1.y + y,v2.x + x,v2.y + y);
+		v1 = v2;
+	}
+};
+zui_GraphicsExtension.drawCubicBezier = function(g2,x,y,segments,strength) {
+	if(strength == null) {
+		strength = 1.0;
+	}
+	if(segments == null) {
+		segments = 20;
+	}
+	var t;
+	var q0 = zui_GraphicsExtension.calculateCubicBezierPoint(0,x,y);
+	var q1;
+	var _g = 1;
+	var _g1 = segments + 1;
+	while(_g < _g1) {
+		var i = _g++;
+		t = i / segments;
+		q1 = zui_GraphicsExtension.calculateCubicBezierPoint(t,x,y);
+		g2.drawLine(q0[0],q0[1],q1[0],q1[1],strength);
+		q0 = q1;
+	}
+};
+zui_GraphicsExtension.drawCubicBezierPath = function(g2,x,y,segments,strength) {
+	if(strength == null) {
+		strength = 1.0;
+	}
+	if(segments == null) {
+		segments = 20;
+	}
+	var i = 0;
+	var t;
+	var q0 = null;
+	var q1 = null;
+	while(i < x.length - 3) {
+		if(i == 0) {
+			q0 = zui_GraphicsExtension.calculateCubicBezierPoint(0,[x[i],x[i + 1],x[i + 2],x[i + 3]],[y[i],y[i + 1],y[i + 2],y[i + 3]]);
+		}
+		var _g = 1;
+		var _g1 = segments + 1;
+		while(_g < _g1) {
+			var j = _g++;
+			t = j / segments;
+			q1 = zui_GraphicsExtension.calculateCubicBezierPoint(t,[x[i],x[i + 1],x[i + 2],x[i + 3]],[y[i],y[i + 1],y[i + 2],y[i + 3]]);
+			g2.drawLine(q0[0],q0[1],q1[0],q1[1],strength);
+			q0 = q1;
+		}
+		i += 3;
+	}
+};
+zui_GraphicsExtension.calculateCubicBezierPoint = function(t,x,y) {
+	var u = 1 - t;
+	var tt = t * t;
+	var uu = u * u;
+	var uuu = uu * u;
+	var ttt = tt * t;
+	var p = [uuu * x[0],uuu * y[0]];
+	p[0] += 3 * uu * t * x[1];
+	p[1] += 3 * uu * t * y[1];
+	p[0] += 3 * u * tt * x[2];
+	p[1] += 3 * u * tt * y[2];
+	p[0] += ttt * x[3];
+	p[1] += ttt * y[3];
+	return p;
+};
+zui_GraphicsExtension.drawAlignedString = function(g2,text,x,y,horAlign,verAlign) {
+	var xoffset = 0.0;
+	if(horAlign == 1 || horAlign == 2) {
+		var width = g2.get_font().width(g2.get_fontSize(),text);
+		if(horAlign == 1) {
+			xoffset = -width * 0.5;
+		} else {
+			xoffset = -width;
+		}
+	}
+	var yoffset = 0.0;
+	if(verAlign == 1 || verAlign == 2) {
+		var height = g2.get_font().height(g2.get_fontSize());
+		if(verAlign == 1) {
+			yoffset = -height * 0.5;
+		} else {
+			yoffset = -height;
+		}
+	}
+	g2.drawString(text,x + xoffset,y + yoffset);
+};
+zui_GraphicsExtension.drawAlignedCharacters = function(g2,text,start,length,x,y,horAlign,verAlign) {
+	var xoffset = 0.0;
+	if(horAlign == 1 || horAlign == 2) {
+		var width = g2.get_font().widthOfCharacters(g2.get_fontSize(),text,start,length);
+		if(horAlign == 1) {
+			xoffset = -width * 0.5;
+		} else {
+			xoffset = -width;
+		}
+	}
+	var yoffset = 0.0;
+	if(verAlign == 1 || verAlign == 2) {
+		var height = g2.get_font().height(g2.get_fontSize());
+		if(verAlign == 1) {
+			yoffset = -height * 0.5;
+		} else {
+			yoffset = -height;
+		}
+	}
+	g2.drawCharacters(text,start,length,x + xoffset,y + yoffset);
+};
 var zui_Id = function() { };
 $hxClasses["zui.Id"] = zui_Id;
 zui_Id.__name__ = true;
@@ -31207,12 +31652,13 @@ var zui_Zui = function(ops) {
 	this.sliderTooltipY = 0.0;
 	this.sliderTooltipX = 0.0;
 	this.sliderTooltip = false;
-	this.touchHold = false;
+	this.touchHoldActivated = false;
 	this.highlightFullRow = false;
 	this.windowBorderRight = 0;
 	this.windowBorderLeft = 0;
 	this.windowBorderBottom = 0;
 	this.windowBorderTop = 0;
+	this.textColoring = null;
 	this.tabSwitchEnabled = true;
 	this.highlightOnSelect = true;
 	this.alwaysRedraw = false;
@@ -31263,6 +31709,74 @@ var zui_Zui = function(ops) {
 };
 $hxClasses["zui.Zui"] = zui_Zui;
 zui_Zui.__name__ = true;
+zui_Zui.extractColoring = function(text,col) {
+	var res = { colored : "", uncolored : ""};
+	var coloring = false;
+	var startFrom = 0;
+	var startLength = 0;
+	var _g = 0;
+	var _g1 = text.length;
+	while(_g < _g1) {
+		var i = _g++;
+		var skipFirst = false;
+		var length = zui_Zui.checkStart(i,text,col.start);
+		var separatedLeft;
+		if(i != 0) {
+			var code = HxOverrides.cca(text,i - 1);
+			separatedLeft = !(code >= 65 && code <= 90 || code >= 97 && code <= 122);
+		} else {
+			separatedLeft = true;
+		}
+		var separatedRight;
+		if(i + length < text.length) {
+			var code1 = HxOverrides.cca(text,i + length);
+			separatedRight = !(code1 >= 65 && code1 <= 90 || code1 >= 97 && code1 <= 122);
+		} else {
+			separatedRight = true;
+		}
+		var isSeparated = separatedLeft && separatedRight;
+		if(length > 0 && (!coloring || col.end == "") && (!col.separated || isSeparated)) {
+			coloring = true;
+			startFrom = i;
+			startLength = length;
+			if(col.end != "" && col.end != "\n") {
+				skipFirst = true;
+			}
+		} else if(col.end == "") {
+			if(i == startFrom + startLength) {
+				coloring = false;
+			}
+		} else if(HxOverrides.substr(text,i,col.end.length) == col.end) {
+			coloring = false;
+		}
+		var b = coloring && !skipFirst;
+		res.colored += b ? text.charAt(i) : " ";
+		res.uncolored += b ? " " : text.charAt(i);
+	}
+	return res;
+};
+zui_Zui.isChar = function(code) {
+	if(!(code >= 65 && code <= 90)) {
+		if(code >= 97) {
+			return code <= 122;
+		} else {
+			return false;
+		}
+	} else {
+		return true;
+	}
+};
+zui_Zui.checkStart = function(i,text,start) {
+	var _g = 0;
+	while(_g < start.length) {
+		var s = start[_g];
+		++_g;
+		if(HxOverrides.substr(text,i,s.length) == s) {
+			return s.length;
+		}
+	}
+	return 0;
+};
 zui_Zui.prototype = {
 	isScrolling: null
 	,isTyping: null
@@ -31277,12 +31791,13 @@ zui_Zui.prototype = {
 	,alwaysRedraw: null
 	,highlightOnSelect: null
 	,tabSwitchEnabled: null
+	,textColoring: null
 	,windowBorderTop: null
 	,windowBorderBottom: null
 	,windowBorderLeft: null
 	,windowBorderRight: null
 	,highlightFullRow: null
-	,touchHold: null
+	,touchHoldActivated: null
 	,sliderTooltip: null
 	,sliderTooltipX: null
 	,sliderTooltipY: null
@@ -31302,6 +31817,7 @@ zui_Zui.prototype = {
 	,inputReleasedR: null
 	,inputDown: null
 	,inputDownR: null
+	,penInUse: null
 	,isKeyPressed: null
 	,isKeyDown: null
 	,isShiftDown: null
@@ -31434,7 +31950,13 @@ zui_Zui.prototype = {
 	}
 	,registerInput: function() {
 		var _gthis = this;
+		if(this.inputRegistered) {
+			return;
+		}
 		kha_input_Mouse.get().notifyWindowed(this.ops.khaWindowId,$bind(this,this.onMouseDown),$bind(this,this.onMouseUp),$bind(this,this.onMouseMove),$bind(this,this.onMouseWheel));
+		if(kha_input_Pen.get() != null) {
+			kha_input_Pen.get().notify($bind(this,this.onPenDown),$bind(this,this.onPenUp),$bind(this,this.onPenMove));
+		}
 		kha_input_Keyboard.get().notify($bind(this,this.onKeyDown),$bind(this,this.onKeyUp),$bind(this,this.onKeyPress));
 		kha_System.notifyOnApplicationState(function() {
 			_gthis.inputDX = _gthis.inputDY = 0;
@@ -31442,7 +31964,13 @@ zui_Zui.prototype = {
 		this.inputRegistered = true;
 	}
 	,unregisterInput: function() {
+		if(!this.inputRegistered) {
+			return;
+		}
 		kha_input_Mouse.get().removeWindowed(this.ops.khaWindowId,$bind(this,this.onMouseDown),$bind(this,this.onMouseUp),$bind(this,this.onMouseMove),$bind(this,this.onMouseWheel));
+		if(kha_input_Pen.get() != null) {
+			kha_input_Pen.get().remove($bind(this,this.onPenDown),$bind(this,this.onPenUp),$bind(this,this.onPenMove));
+		}
 		kha_input_Keyboard.get().remove($bind(this,this.onKeyDown),$bind(this,this.onKeyUp),$bind(this,this.onKeyPress));
 		this.endInput();
 		this.isShiftDown = this.isCtrlDown = this.isAltDown = false;
@@ -31525,14 +32053,16 @@ zui_Zui.prototype = {
 		this.inputDX = 0;
 		this.inputDY = 0;
 		this.inputWheelDelta = 0;
+		this.penInUse = false;
 		if(zui_Zui.keyRepeat && this.isKeyDown && kha_Scheduler.time() - zui_Zui.keyRepeatTime > 0.05) {
 			if(this.key == 8 || this.key == 46 || this.key == 37 || this.key == 39 || this.key == 38 || this.key == 40) {
 				zui_Zui.keyRepeatTime = kha_Scheduler.time();
 				this.isKeyPressed = true;
 			}
 		}
-		if(zui_Zui.touchControls && this.inputDown && this.inputX == this.inputStartedX && this.inputY == this.inputStartedY && this.inputStartedTime > 0 && kha_Scheduler.time() - this.inputStartedTime > 0.5) {
-			this.touchHold = true;
+		if(zui_Zui.touchHold && this.inputDown && this.inputX == this.inputStartedX && this.inputY == this.inputStartedY && this.inputStartedTime > 0 && kha_Scheduler.time() - this.inputStartedTime > 0.7) {
+			this.touchHoldActivated = true;
+			this.inputReleasedR = true;
 			this.inputStartedTime = 0;
 		}
 	}
@@ -31547,7 +32077,7 @@ zui_Zui.prototype = {
 		var wx = x + handle.dragX;
 		var wy = y + handle.dragY;
 		var inputChanged = this.getInputInRect(wx,wy,w,h) && this.inputChanged();
-		if(!(this.alwaysRedraw || this.isScrolling || this.isTyping)) {
+		if(!(this.alwaysRedraw || this.isScrolling)) {
 			return inputChanged;
 		} else {
 			return true;
@@ -31631,7 +32161,7 @@ zui_Zui.prototype = {
 		if(handle == null) {
 			return;
 		}
-		if(handle.redraws > 0 || this.isScrolling || this.isTyping) {
+		if(handle.redraws > 0 || this.isScrolling) {
 			if(this.scissor) {
 				this.scissor = false;
 				this.g.disableScissor();
@@ -31669,7 +32199,7 @@ zui_Zui.prototype = {
 					this.isScrolling = true;
 				}
 				var scrollDelta = this.inputWheelDelta;
-				if(zui_Zui.touchControls && this.inputDown && this.inputDY != 0) {
+				if(zui_Zui.touchScroll && this.inputDown && this.inputDY != 0 && this.inputX > this._windowX + this.windowHeaderW && this.inputY > this._windowY + this.windowHeaderH) {
 					this.isScrolling = true;
 					scrollDelta = -this.inputDY / 20;
 				}
@@ -31884,7 +32414,6 @@ zui_Zui.prototype = {
 			this.drawArrow(handle.selected);
 		}
 		this.g.set_color(this.t.LABEL_COL);
-		this.g.set_opacity(1.0);
 		this.drawString(this.g,text,this.titleOffsetX,0);
 		this.endElement();
 		if(pack && !handle.selected) {
@@ -32184,14 +32713,11 @@ zui_Zui.prototype = {
 			this.g.set_color(this.t.ACCENT_SELECT_COL);
 			this.g.fillRect(hlStart,this._y + this.buttonOffsetY * 1.5,hlstrw,cursorHeight);
 		}
-		var time = kha_Scheduler.time();
-		if(this.isKeyDown || time % 1. < 0.5) {
-			var str = align == 0 ? HxOverrides.substr(text,0,this.cursorX) : text.substring(this.cursorX,text.length);
-			var strw = this.ops.font.width(this.fontSize,str);
-			var cursorX = align == 0 ? this._x + strw + off : this._x + this._w - strw - off;
-			this.g.set_color(this.t.TEXT_COL);
-			this.g.fillRect(cursorX,this._y + this.buttonOffsetY * 1.5,this.ops.scaleFactor,cursorHeight);
-		}
+		var str = align == 0 ? HxOverrides.substr(text,0,this.cursorX) : text.substring(this.cursorX,text.length);
+		var strw = this.ops.font.width(this.fontSize,str);
+		var cursorX = align == 0 ? this._x + strw + off : this._x + this._w - strw - off;
+		this.g.set_color(this.t.TEXT_COL);
+		this.g.fillRect(cursorX,this._y + this.buttonOffsetY * 1.5,2 * this.ops.scaleFactor,cursorHeight);
 		this.textSelected = text;
 		if(liveUpdate && this.textSelectedHandle != null) {
 			this.textSelectedHandle.changed = this.textSelectedHandle.text != this.textSelected;
@@ -32292,6 +32818,9 @@ zui_Zui.prototype = {
 			kha_input_Keyboard.get().hide();
 		}
 		this.highlightAnchor = this.cursorX;
+		if(zui_Zui.onDeselectText != null) {
+			zui_Zui.onDeselectText();
+		}
 	}
 	,button: function(text,align,label) {
 		if(label == null) {
@@ -32546,7 +33075,7 @@ zui_Zui.prototype = {
 			this.scrollHandle = handle;
 			this.isScrolling = true;
 			this.changed = handle.changed = true;
-			if(zui_Zui.touchControls) {
+			if(zui_Zui.touchTooltip) {
 				this.sliderTooltip = true;
 				this.sliderTooltipX = this._x + this._windowX;
 				this.sliderTooltipY = this._y + this._windowY;
@@ -32808,6 +33337,9 @@ zui_Zui.prototype = {
 			}
 			this.fill(0,0,this._w / this.ops.scaleFactor,this.t.ELEMENT_H * this.ops.scaleFactor / this.ops.scaleFactor,this.t.SEPARATOR_COL);
 			search = this.textInput(comboSearchHandle,"",0,true,true).toLowerCase();
+			if(this.isReleased) {
+				zui_Zui.comboFirst = true;
+			}
 			if(zui_Zui.comboFirst) {
 				this.startTextEdit(comboSearchHandle);
 			}
@@ -32886,6 +33418,24 @@ zui_Zui.prototype = {
 			this.globalG.fillRect(x - xoff,this.sliderTooltipY - yoff,xoff * 2,yoff);
 			this.globalG.set_color(this.t.TEXT_COL);
 			this.globalG.drawString(text,x - xoff,this.sliderTooltipY - yoff);
+			if(bindGlobalG) {
+				this.globalG.end();
+			}
+		}
+		if(zui_Zui.touchTooltip && this.textSelectedHandle != null) {
+			if(bindGlobalG) {
+				this.globalG.begin(false);
+			}
+			this.globalG.set_font(this.ops.font);
+			this.globalG.set_fontSize(this.fontSize * 2);
+			var xoff = this.ops.font.width(this.globalG.get_fontSize(),this.textSelected) / 2;
+			var yoff = this.ops.font.height(this.globalG.get_fontSize()) / 2;
+			var x = kha_System.windowWidth() / 2;
+			var y = kha_System.windowHeight() / 3;
+			this.globalG.set_color(this.t.ACCENT_COL);
+			this.globalG.fillRect(x - xoff,y - yoff,xoff * 2,yoff * 2);
+			this.globalG.set_color(this.t.TEXT_COL);
+			this.globalG.drawString(this.textSelected,x - xoff,y - yoff);
 			if(bindGlobalG) {
 				this.globalG.end();
 			}
@@ -33022,7 +33572,24 @@ zui_Zui.prototype = {
 			this.fadeColor();
 		}
 		g.set_pipeline(this.rtTextPipeline);
-		g.drawString(text,this._x + xOffset,this._y + this.fontOffsetY + yOffset);
+		if(this.textColoring == null) {
+			g.drawString(text,this._x + xOffset,this._y + this.fontOffsetY + yOffset);
+		} else {
+			var _g = 0;
+			var _g1 = this.textColoring.colorings;
+			while(_g < _g1.length) {
+				var coloring = _g1[_g];
+				++_g;
+				var result = zui_Zui.extractColoring(text,coloring);
+				if(result.colored != "") {
+					g.set_color(coloring.color);
+					g.drawString(result.colored,this._x + xOffset,this._y + this.fontOffsetY + yOffset);
+				}
+				text = result.uncolored;
+			}
+			g.set_color(this.textColoring.default_color);
+			g.drawString(text,this._x + xOffset,this._y + this.fontOffsetY + yOffset);
+		}
 		g.set_pipeline(null);
 	}
 	,endElement: function(elementSize) {
@@ -33196,6 +33763,9 @@ zui_Zui.prototype = {
 		}
 	}
 	,onMouseDown: function(button,x,y) {
+		if(this.penInUse) {
+			return;
+		}
 		if(button == 0) {
 			this.inputStarted = true;
 		} else {
@@ -33211,6 +33781,13 @@ zui_Zui.prototype = {
 		this.inputStartedY = y;
 	}
 	,onMouseUp: function(button,x,y) {
+		if(this.penInUse) {
+			return;
+		}
+		if(this.touchHoldActivated) {
+			this.touchHoldActivated = false;
+			return;
+		}
 		if(this.isScrolling) {
 			this.isScrolling = false;
 			this.scrollHandle = null;
@@ -33233,11 +33810,6 @@ zui_Zui.prototype = {
 			this.inputDownR = false;
 		}
 		this.deselectText();
-		if(this.touchHold) {
-			this.touchHold = false;
-			this.inputReleased = false;
-			this.inputReleasedR = true;
-		}
 	}
 	,onMouseMove: function(x,y,movementX,movementY) {
 		this.setInputPosition(x,y);
@@ -33250,6 +33822,21 @@ zui_Zui.prototype = {
 		this.inputDY += y - this.inputY;
 		this.inputX = x;
 		this.inputY = y;
+	}
+	,onPenDown: function(x,y,pressure) {
+		this.onMouseDown(0,x,y);
+	}
+	,onPenUp: function(x,y,pressure) {
+		if(this.inputStarted) {
+			this.inputStarted = false;
+			this.penInUse = true;
+			return;
+		}
+		this.onMouseUp(0,x,y);
+		this.penInUse = true;
+	}
+	,onPenMove: function(x,y,pressure) {
+		this.onMouseMove(x,y,0,0);
 	}
 	,onKeyDown: function(code) {
 		this.key = code;
@@ -33378,9 +33965,6 @@ zui_Zui.prototype = {
 	,SCALE: function() {
 		return this.ops.scaleFactor;
 	}
-	,FLASH_SPEED: function() {
-		return 0.5;
-	}
 	,TOOLTIP_DELAY: function() {
 		return 1.0;
 	}
@@ -33471,6 +34055,7 @@ armory_ui_Canvas.events = [];
 armory_ui_Canvas.screenW = -1;
 armory_ui_Canvas.screenH = -1;
 armory_ui_Canvas.locale = "en";
+armory_ui_Canvas.imageScaleQuality = 0;
 armory_ui_Canvas.h = new zui_Handle();
 armory_ui_Canvas.elemId = -1;
 armory_ui_Canvas.assetId = -1;
@@ -33711,6 +34296,8 @@ kha_netsync_SyncBuilder.nextId = 0;
 kha_netsync_SyncBuilder.objects = [];
 zui_Ext.dataPath = "";
 zui_Ext.lastPath = "";
+zui_Ext.textAreaLineNumbers = false;
+zui_Ext.textAreaScrollPastEnd = false;
 zui_Ext._ELEMENT_OFFSET = 0;
 zui_Ext._BUTTON_COL = 0;
 zui_Ext.kx = 1.0;
@@ -33728,7 +34315,9 @@ zui_Themes.dark = { NAME : "Default Dark", WINDOW_BG_COL : -14079703, WINDOW_TIN
 zui_Zui.alwaysRedrawWindow = true;
 zui_Zui.keyRepeat = true;
 zui_Zui.dynamicGlyphLoad = true;
-zui_Zui.touchControls = false;
+zui_Zui.touchScroll = false;
+zui_Zui.touchHold = false;
+zui_Zui.touchTooltip = false;
 zui_Zui.keyRepeatTime = 0.0;
 zui_Zui.textToPaste = "";
 zui_Zui.textToCopy = "";
