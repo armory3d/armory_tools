@@ -45,8 +45,8 @@ if UPDATE_PIP:
 from markdownmaker.document import Document
 from markdownmaker.markdownmaker import *
 
-PY_NODE_DIR = "https://github.com/armory3d/armory/blob/main/blender/arm/logicnode/"
-HX_NODE_DIR = "https://github.com/armory3d/armory/blob/main/Sources/armory/logicnode/"
+PY_NODE_DIR = "https://github.com/armory3d/armory/blob/main/armory/blender/arm/logicnode/"
+HX_NODE_DIR = "https://github.com/armory3d/armory/blob/main/armory/Sources/armory/logicnode/"
 IMG_DIR = "https://github.com/armory3d/armory_wiki_images/raw/master/logic_nodes/"
 
 OUTPUT_DIR = os.path.abspath(__file__)
